@@ -275,6 +275,7 @@ section.success a.active {
     display: block;
     position: relative;
     margin: 0 auto;
+    margin-bottom: 30px;
     max-width: 300px;
 }
 
