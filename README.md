@@ -28,4 +28,3 @@ Copyright 2013-2015 Iron Summit Media Strategies, LLC. Code released under the [
 =======
 # gomie
 Webby
->>>>>>> 7a72868a97257889c484fd4ef5927a5ddb5265ce
