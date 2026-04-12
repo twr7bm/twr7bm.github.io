@@ -1107,7 +1107,7 @@ function toggleTheme() {
     var mouseX = 0, mouseY = 0;
     var NUM_POINTS = 90;
     var CONNECT_DIST = 160;
-    var PARALLAX = 50;
+    var PARALLAX = 0;
 
     function resize() {
         canvas.width = window.innerWidth;
@@ -1178,7 +1178,6 @@ function toggleTheme() {
     }
 
     window.addEventListener('resize', function() { resize(); initPoints(); });
-    document.addEventListener('mousemove', function(e) { mouseX = e.clientX; mouseY = e.clientY; });
 
     resize();
     initPoints();
