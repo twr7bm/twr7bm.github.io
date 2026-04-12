@@ -1106,42 +1106,57 @@ function toggleTheme() {
         return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
     }
 
-    // 1D row count sketch: S @ M then S^T @ (S @ M)
-    function countSketchRows(data, n, m, rng) {
+    var NUM_SKETCHES = 5;
+
+    // Single count sketch recovery (returns Float64Array per channel)
+    function countSketchOnce(data, n, m, rng) {
         var hash = new Int32Array(n), sign = new Float64Array(n);
         for (var i = 0; i < n; i++) {
             hash[i] = Math.floor(rng() * m);
             sign[i] = rng() < 0.5 ? 1 : -1;
         }
-        var result = new Uint8ClampedArray(data.length);
+        var recovered = new Float64Array(n * n * 3);
         for (var ch = 0; ch < 3; ch++) {
-            // Sketch: n rows -> m buckets
             var sketch = new Float64Array(m * n);
             for (var r = 0; r < n; r++)
                 for (var c = 0; c < n; c++)
                     sketch[hash[r] * n + c] += sign[r] * data[(r * n + c) * 4 + ch];
-            // Recover: read back from buckets
+            for (var r = 0; r < n; r++)
+                for (var c = 0; c < n; c++)
+                    recovered[(ch * n + r) * n + c] = sign[r] * sketch[hash[r] * n + c];
+        }
+        return recovered;
+    }
+
+    // Median-of-k count sketches
+    function countSketchMedian(data, n, m, baseSeed) {
+        var copies = [];
+        for (var t = 0; t < NUM_SKETCHES; t++)
+            copies.push(countSketchOnce(data, n, m, prng(baseSeed + t * 7919)));
+
+        var result = new Uint8ClampedArray(data.length);
+        var vals = new Float64Array(NUM_SKETCHES);
+        for (var ch = 0; ch < 3; ch++)
             for (var r = 0; r < n; r++)
                 for (var c = 0; c < n; c++) {
-                    var v = sign[r] * sketch[hash[r] * n + c];
-                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(v)));
+                    for (var t = 0; t < NUM_SKETCHES; t++)
+                        vals[t] = copies[t][(ch * n + r) * n + c];
+                    vals.sort();
+                    var med = vals[Math.floor(NUM_SKETCHES / 2)];
+                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(med)));
                 }
-        }
         for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
         return result;
     }
 
-    // 1D row Gaussian sketch: S @ M then S^T @ (S @ M)
-    function gaussianSketchRows(data, n, m, rng) {
+    // Single Gaussian sketch recovery (returns Float64Array per channel)
+    function gaussianSketchOnce(data, n, m, rng) {
         var scale = 1.0 / Math.sqrt(m);
-        // Generate S: m x n
         var S = new Float64Array(m * n);
         for (var i = 0; i < m * n; i++) S[i] = gaussRand(rng) * scale;
 
-        var result = new Uint8ClampedArray(data.length);
+        var recovered = new Float64Array(n * n * 3);
         for (var ch = 0; ch < 3; ch++) {
-            // Extract channel as column vectors (operate on each column independently)
-            // Sketch: y = S @ x for each column
             var sketched = new Float64Array(m * n);
             for (var c = 0; c < n; c++)
                 for (var i = 0; i < m; i++) {
@@ -1150,15 +1165,31 @@ function toggleTheme() {
                         sum += S[i * n + k] * data[(k * n + c) * 4 + ch];
                     sketched[i * n + c] = sum;
                 }
-            // Recover: x_hat = S^T @ y for each column
             for (var c = 0; c < n; c++)
                 for (var i = 0; i < n; i++) {
                     var sum = 0;
                     for (var k = 0; k < m; k++)
                         sum += S[k * n + i] * sketched[k * n + c];
-                    result[(i * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(sum)));
+                    recovered[(ch * n + i) * n + c] = sum;
                 }
         }
+        return recovered;
+    }
+
+    // Mean-of-k Gaussian sketches
+    function gaussianSketchMean(data, n, m, baseSeed) {
+        var accum = new Float64Array(n * n * 3);
+        for (var t = 0; t < NUM_SKETCHES; t++) {
+            var rec = gaussianSketchOnce(data, n, m, prng(baseSeed + t * 7919));
+            for (var i = 0; i < accum.length; i++) accum[i] += rec[i];
+        }
+        var result = new Uint8ClampedArray(data.length);
+        for (var ch = 0; ch < 3; ch++)
+            for (var r = 0; r < n; r++)
+                for (var c = 0; c < n; c++) {
+                    var v = accum[(ch * n + r) * n + c] / NUM_SKETCHES;
+                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(v)));
+                }
         for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
         return result;
     }
@@ -1179,9 +1210,9 @@ function toggleTheme() {
         var imgData = ctx.getImageData(0, 0, SIZE, SIZE);
         var pixels = imgData.data;
 
-        // Precompute sketched images
-        countResult = countSketchRows(pixels, SIZE, SKETCH_M, prng(42));
-        gaussianResult = gaussianSketchRows(pixels, SIZE, SKETCH_M, prng(123));
+        // Precompute sketched images (median-of-5 for count, mean-of-5 for Gaussian)
+        countResult = countSketchMedian(pixels, SIZE, SKETCH_M, 42);
+        gaussianResult = gaussianSketchMean(pixels, SIZE, SKETCH_M, 123);
     }
 
     var img = document.querySelector('.hero-photo');
