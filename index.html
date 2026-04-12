@@ -172,20 +172,30 @@
             align-items: start;
         }
 
-        .hero-photo {
+        .hero-photo-wrapper {
             width: 220px;
             height: 220px;
             border-radius: 50%;
-            object-fit: cover;
-            object-position: center 5%;
+            overflow: hidden;
             border: 3px solid var(--border-subtle);
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .hero-photo-wrapper:hover {
+            border-color: var(--accent);
+        }
+
+        .hero-photo {
+            width: 100%;
+            height: auto;
+            transform: scale(1.4) translateY(-8%);
             filter: grayscale(10%);
             transition: var(--transition);
         }
 
-        .hero-photo:hover {
+        .hero-photo-wrapper:hover .hero-photo {
             filter: grayscale(0%);
-            border-color: var(--accent);
         }
 
         .hero-text h1 {
@@ -540,7 +550,7 @@
                 text-align: center;
             }
 
-            .hero-photo {
+            .hero-photo-wrapper {
                 width: 160px;
                 height: 160px;
             }
@@ -729,7 +739,9 @@
 <!-- Hero -->
 <div class="hero" id="top">
     <div class="hero-content">
-        <img src="img/selfie.jpg" alt="Tahseen Rabbani" class="hero-photo">
+        <div class="hero-photo-wrapper">
+            <img src="img/selfie.jpg" alt="Tahseen Rabbani" class="hero-photo">
+        </div>
         <div class="hero-text">
             <h1>Tahseen Rabbani</h1>
             <p class="hero-title">Postdoctoral Scholar &middot; University of Chicago</p>
