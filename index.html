@@ -744,6 +744,22 @@
         [data-theme="light"] .theme-toggle .icon-sun { display: none; }
 
         /* ========== Selection ========== */
+        /* ========== Wireframe Background ========== */
+        #wireframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        nav, .hero, section, footer, .lightbox {
+            position: relative;
+            z-index: 1;
+        }
+
         ::selection {
             background: rgba(123, 164, 204, 0.3);
             color: #fff;
@@ -752,6 +768,8 @@
 </head>
 
 <body>
+
+<canvas id="wireframe"></canvas>
 
 <!-- Navigation -->
 <nav>
@@ -1072,6 +1090,90 @@ function toggleTheme() {
 (function() {
     const saved = localStorage.getItem('theme');
     if (saved) document.documentElement.setAttribute('data-theme', saved);
+})();
+
+// ========== Wireframe Background ==========
+(function() {
+    var canvas = document.getElementById('wireframe');
+    var ctx = canvas.getContext('2d');
+    var points = [];
+    var mouseX = 0, mouseY = 0;
+    var NUM_POINTS = 90;
+    var CONNECT_DIST = 160;
+    var PARALLAX = 20;
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function initPoints() {
+        points = [];
+        for (var i = 0; i < NUM_POINTS; i++) {
+            points.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3
+            });
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+        var dotColor = isDark ? 'rgba(123, 164, 204, 0.4)' : 'rgba(58, 111, 160, 0.3)';
+        var lineColor = isDark ? 'rgba(123, 164, 204, 0.08)' : 'rgba(58, 111, 160, 0.06)';
+
+        // Parallax offset based on mouse
+        var ox = (mouseX / canvas.width - 0.5) * PARALLAX;
+        var oy = (mouseY / canvas.height - 0.5) * PARALLAX;
+
+        // Update positions
+        for (var i = 0; i < points.length; i++) {
+            var p = points[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        }
+
+        // Draw connections
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 1;
+        for (var i = 0; i < points.length; i++) {
+            for (var j = i + 1; j < points.length; j++) {
+                var dx = points[i].x - points[j].x;
+                var dy = points[i].y - points[j].y;
+                var dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < CONNECT_DIST) {
+                    ctx.globalAlpha = 1 - dist / CONNECT_DIST;
+                    ctx.beginPath();
+                    ctx.moveTo(points[i].x + ox, points[i].y + oy);
+                    ctx.lineTo(points[j].x + ox, points[j].y + oy);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw dots
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = dotColor;
+        for (var i = 0; i < points.length; i++) {
+            ctx.beginPath();
+            ctx.arc(points[i].x + ox, points[i].y + oy, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', function() { resize(); initPoints(); });
+    document.addEventListener('mousemove', function(e) { mouseX = e.clientX; mouseY = e.clientY; });
+
+    resize();
+    initPoints();
+    draw();
 })();
 
 // Sketch demo — swap precomputed images
