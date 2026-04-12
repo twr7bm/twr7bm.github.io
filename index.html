@@ -1100,7 +1100,7 @@ function toggleTheme() {
     var mouseX = 0, mouseY = 0;
     var NUM_POINTS = 90;
     var CONNECT_DIST = 160;
-    var PARALLAX = 20;
+    var PARALLAX = 50;
 
     function resize() {
         canvas.width = window.innerWidth;
@@ -1134,8 +1134,10 @@ function toggleTheme() {
             var p = points[i];
             p.x += p.vx;
             p.y += p.vy;
-            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+            if (p.x < 0) p.x += canvas.width;
+            else if (p.x > canvas.width) p.x -= canvas.width;
+            if (p.y < 0) p.y += canvas.height;
+            else if (p.y > canvas.height) p.y -= canvas.height;
         }
 
         // Draw connections
