@@ -167,9 +167,16 @@
 
         .hero-content {
             display: grid;
-            grid-template-columns: 220px 1fr;
+            grid-template-columns: auto 1fr;
             gap: 3rem;
             align-items: start;
+        }
+
+        .hero-photo-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .hero-photo-wrapper {
@@ -179,11 +186,21 @@
             overflow: hidden;
             border: 3px solid var(--border-subtle);
             flex-shrink: 0;
+            position: relative;
             transition: var(--transition);
         }
 
         .hero-photo-wrapper:hover {
             border-color: var(--accent);
+        }
+
+        #sketch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
         }
 
         .hero-photo {
@@ -194,6 +211,37 @@
             transform: scale(1.3);
             filter: grayscale(10%);
             transition: var(--transition);
+        }
+
+        .sketch-buttons {
+            display: flex;
+            gap: 0.35rem;
+            justify-content: center;
+        }
+
+        .sketch-btn {
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .sketch-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+
+        .sketch-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(123, 164, 204, 0.1);
         }
 
         .hero-photo-wrapper:hover .hero-photo {
@@ -741,8 +789,16 @@
 <!-- Hero -->
 <div class="hero" id="top">
     <div class="hero-content">
-        <div class="hero-photo-wrapper">
-            <img src="img/selfie.jpg" alt="Tahseen Rabbani" class="hero-photo">
+        <div class="hero-photo-col">
+            <div class="hero-photo-wrapper">
+                <img src="img/selfie.jpg" alt="Tahseen Rabbani" class="hero-photo">
+                <canvas id="sketch-canvas" width="220" height="220"></canvas>
+            </div>
+            <div class="sketch-buttons">
+                <button class="sketch-btn active" onclick="showSketch('original', this)">Original</button>
+                <button class="sketch-btn" onclick="showSketch('count', this)">Count Sketch</button>
+                <button class="sketch-btn" onclick="showSketch('gaussian', this)">Gaussian Sketch</button>
+            </div>
         </div>
         <div class="hero-text">
             <h1>Tahseen Rabbani</h1>
@@ -1024,6 +1080,135 @@ function toggleTheme() {
 (function() {
     const saved = localStorage.getItem('theme');
     if (saved) document.documentElement.setAttribute('data-theme', saved);
+})();
+
+// ========== Sketch Demo ==========
+(function() {
+    const SIZE = 220;
+    const SKETCH_M = 80;
+    let countResult = null;
+    let gaussianResult = null;
+
+    // Seeded PRNG (mulberry32)
+    function prng(seed) {
+        return function() {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+
+    function gaussRand(rng) {
+        var u1, u2;
+        do { u1 = rng(); } while (u1 === 0);
+        u2 = rng();
+        return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    }
+
+    // 1D row count sketch: S @ M then S^T @ (S @ M)
+    function countSketchRows(data, n, m, rng) {
+        var hash = new Int32Array(n), sign = new Float64Array(n);
+        for (var i = 0; i < n; i++) {
+            hash[i] = Math.floor(rng() * m);
+            sign[i] = rng() < 0.5 ? 1 : -1;
+        }
+        var result = new Uint8ClampedArray(data.length);
+        for (var ch = 0; ch < 3; ch++) {
+            // Sketch: n rows -> m buckets
+            var sketch = new Float64Array(m * n);
+            for (var r = 0; r < n; r++)
+                for (var c = 0; c < n; c++)
+                    sketch[hash[r] * n + c] += sign[r] * data[(r * n + c) * 4 + ch];
+            // Recover: read back from buckets
+            for (var r = 0; r < n; r++)
+                for (var c = 0; c < n; c++) {
+                    var v = sign[r] * sketch[hash[r] * n + c];
+                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(v)));
+                }
+        }
+        for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
+        return result;
+    }
+
+    // 1D row Gaussian sketch: S @ M then S^T @ (S @ M)
+    function gaussianSketchRows(data, n, m, rng) {
+        var scale = 1.0 / Math.sqrt(m);
+        // Generate S: m x n
+        var S = new Float64Array(m * n);
+        for (var i = 0; i < m * n; i++) S[i] = gaussRand(rng) * scale;
+
+        var result = new Uint8ClampedArray(data.length);
+        for (var ch = 0; ch < 3; ch++) {
+            // Extract channel as column vectors (operate on each column independently)
+            // Sketch: y = S @ x for each column
+            var sketched = new Float64Array(m * n);
+            for (var c = 0; c < n; c++)
+                for (var i = 0; i < m; i++) {
+                    var sum = 0;
+                    for (var k = 0; k < n; k++)
+                        sum += S[i * n + k] * data[(k * n + c) * 4 + ch];
+                    sketched[i * n + c] = sum;
+                }
+            // Recover: x_hat = S^T @ y for each column
+            for (var c = 0; c < n; c++)
+                for (var i = 0; i < n; i++) {
+                    var sum = 0;
+                    for (var k = 0; k < m; k++)
+                        sum += S[k * n + i] * sketched[k * n + c];
+                    result[(i * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(sum)));
+                }
+        }
+        for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
+        return result;
+    }
+
+    function init() {
+        var img = document.querySelector('.hero-photo');
+        var canvas = document.getElementById('sketch-canvas');
+        var ctx = canvas.getContext('2d');
+
+        // Draw image to canvas replicating CSS cover + scale(1.3) + object-position
+        var iw = img.naturalWidth, ih = img.naturalHeight;
+        var s = Math.max(SIZE / iw, SIZE / ih) * 1.3;
+        var dw = iw * s, dh = ih * s;
+        var dx = (SIZE - dw) / 2;
+        var dy = -(dh - SIZE) * 0.35;
+        ctx.drawImage(img, dx, dy, dw, dh);
+
+        var imgData = ctx.getImageData(0, 0, SIZE, SIZE);
+        var pixels = imgData.data;
+
+        // Precompute sketched images
+        countResult = countSketchRows(pixels, SIZE, SKETCH_M, prng(42));
+        gaussianResult = gaussianSketchRows(pixels, SIZE, SKETCH_M, prng(123));
+    }
+
+    var img = document.querySelector('.hero-photo');
+    if (img.complete && img.naturalWidth > 0) init();
+    else img.addEventListener('load', init);
+
+    window.showSketch = function(type, btn) {
+        document.querySelectorAll('.sketch-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        var canvas = document.getElementById('sketch-canvas');
+        var ctx = canvas.getContext('2d');
+        var photo = document.querySelector('.hero-photo');
+
+        if (type === 'original') {
+            canvas.style.display = 'none';
+            photo.style.visibility = 'visible';
+        } else {
+            var pixels = type === 'count' ? countResult : gaussianResult;
+            if (pixels) {
+                var imgData = new ImageData(pixels, SIZE, SIZE);
+                ctx.putImageData(imgData, 0, 0);
+                canvas.style.display = 'block';
+                photo.style.visibility = 'hidden';
+            }
+        }
+    };
 })();
 </script>
 
