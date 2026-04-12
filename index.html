@@ -798,6 +798,7 @@
                 <button class="sketch-btn active" onclick="showSketch('original', this)">Original</button>
                 <button class="sketch-btn" onclick="showSketch('count', this)">Count Sketch</button>
                 <button class="sketch-btn" onclick="showSketch('gaussian', this)">Gaussian Sketch</button>
+                <button class="sketch-btn" onclick="showSketch('rademacher', this)">Rademacher Sketch</button>
             </div>
         </div>
         <div class="hero-text">
@@ -1091,8 +1092,10 @@ function toggleTheme() {
 (function() {
     const SIZE = 220;
     const SKETCH_M = 80;
+    const NUM_SKETCHES = 9;
     let countResult = null;
     let gaussianResult = null;
+    let rademacherResult = null;
 
     // Seeded PRNG (mulberry32)
     function prng(seed) {
@@ -1110,8 +1113,6 @@ function toggleTheme() {
         u2 = rng();
         return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
     }
-
-    var NUM_SKETCHES = 5;
 
     // Single count sketch recovery (returns Float64Array per channel)
     function countSketchOnce(data, n, m, rng) {
@@ -1199,6 +1200,51 @@ function toggleTheme() {
         return result;
     }
 
+    // Single Rademacher sketch recovery (S with +/-1 entries)
+    function rademacherSketchOnce(data, n, m, rng) {
+        var scale = 1.0 / Math.sqrt(m);
+        var S = new Float64Array(m * n);
+        for (var i = 0; i < m * n; i++) S[i] = (rng() < 0.5 ? 1 : -1) * scale;
+
+        var recovered = new Float64Array(n * n * 3);
+        for (var ch = 0; ch < 3; ch++) {
+            var sketched = new Float64Array(m * n);
+            for (var c = 0; c < n; c++)
+                for (var i = 0; i < m; i++) {
+                    var sum = 0;
+                    for (var k = 0; k < n; k++)
+                        sum += S[i * n + k] * data[(k * n + c) * 4 + ch];
+                    sketched[i * n + c] = sum;
+                }
+            for (var c = 0; c < n; c++)
+                for (var i = 0; i < n; i++) {
+                    var sum = 0;
+                    for (var k = 0; k < m; k++)
+                        sum += S[k * n + i] * sketched[k * n + c];
+                    recovered[(ch * n + i) * n + c] = sum;
+                }
+        }
+        return recovered;
+    }
+
+    // Mean-of-k Rademacher sketches
+    function rademacherSketchMean(data, n, m, baseSeed) {
+        var accum = new Float64Array(n * n * 3);
+        for (var t = 0; t < NUM_SKETCHES; t++) {
+            var rec = rademacherSketchOnce(data, n, m, prng(baseSeed + t * 7919));
+            for (var i = 0; i < accum.length; i++) accum[i] += rec[i];
+        }
+        var result = new Uint8ClampedArray(data.length);
+        for (var ch = 0; ch < 3; ch++)
+            for (var r = 0; r < n; r++)
+                for (var c = 0; c < n; c++) {
+                    var v = accum[(ch * n + r) * n + c] / NUM_SKETCHES;
+                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(v)));
+                }
+        for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
+        return result;
+    }
+
     function init() {
         var img = document.querySelector('.hero-photo');
         var canvas = document.getElementById('sketch-canvas');
@@ -1215,9 +1261,10 @@ function toggleTheme() {
         var imgData = ctx.getImageData(0, 0, SIZE, SIZE);
         var pixels = imgData.data;
 
-        // Precompute sketched images (median-of-5 for count, mean-of-5 for Gaussian)
+        // Precompute sketched images (median-of-9 for count, mean-of-9 for Gaussian/Rademacher)
         countResult = countSketchMedian(pixels, SIZE, SKETCH_M, 42);
         gaussianResult = gaussianSketchMean(pixels, SIZE, SKETCH_M, 123);
+        rademacherResult = rademacherSketchMean(pixels, SIZE, SKETCH_M, 256);
     }
 
     var img = document.querySelector('.hero-photo');
@@ -1236,7 +1283,7 @@ function toggleTheme() {
             canvas.style.display = 'none';
             photo.style.visibility = 'visible';
         } else {
-            var pixels = type === 'count' ? countResult : gaussianResult;
+            var pixels = type === 'count' ? countResult : type === 'gaussian' ? gaussianResult : rademacherResult;
             if (pixels) {
                 var imgData = new ImageData(pixels, SIZE, SIZE);
                 ctx.putImageData(imgData, 0, 0);
