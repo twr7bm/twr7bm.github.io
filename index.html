@@ -186,7 +186,6 @@
             overflow: hidden;
             border: 3px solid var(--border-subtle);
             flex-shrink: 0;
-            position: relative;
             transition: var(--transition);
         }
 
@@ -194,21 +193,10 @@
             border-color: var(--accent);
         }
 
-        #sketch-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
-
         .hero-photo {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center 35%;
-            transform: scale(1.3);
             filter: grayscale(10%);
             transition: var(--transition);
         }
@@ -791,14 +779,13 @@
     <div class="hero-content">
         <div class="hero-photo-col">
             <div class="hero-photo-wrapper">
-                <img src="img/selfie.jpg" alt="Tahseen Rabbani" class="hero-photo">
-                <canvas id="sketch-canvas" width="220" height="220"></canvas>
+                <img src="img/sketch_original.png" alt="Tahseen Rabbani" class="hero-photo" id="hero-photo">
             </div>
             <div class="sketch-buttons">
-                <button class="sketch-btn active" onclick="showSketch('original', this)">Original</button>
-                <button class="sketch-btn" onclick="showSketch('count', this)">Count Sketch</button>
-                <button class="sketch-btn" onclick="showSketch('gaussian', this)">Gaussian Sketch</button>
-                <button class="sketch-btn" onclick="showSketch('rademacher', this)">Rademacher Sketch</button>
+                <button class="sketch-btn active" onclick="showSketch('img/sketch_original.png', this)">Original</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_count.png', this)">Count</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_gaussian.png', this)">Gaussian</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_rademacher.png', this)">Rademacher</button>
             </div>
         </div>
         <div class="hero-text">
@@ -1088,211 +1075,12 @@ function toggleTheme() {
     if (saved) document.documentElement.setAttribute('data-theme', saved);
 })();
 
-// ========== Sketch Demo ==========
-(function() {
-    const SIZE = 220;
-    const SKETCH_M = 80;
-    const NUM_SKETCHES = 9;
-    let countResult = null;
-    let gaussianResult = null;
-    let rademacherResult = null;
-
-    // Seeded PRNG (mulberry32)
-    function prng(seed) {
-        return function() {
-            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-            var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-            return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        };
-    }
-
-    function gaussRand(rng) {
-        var u1, u2;
-        do { u1 = rng(); } while (u1 === 0);
-        u2 = rng();
-        return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    }
-
-    // Single count sketch recovery (returns Float64Array per channel)
-    function countSketchOnce(data, n, m, rng) {
-        var hash = new Int32Array(n), sign = new Float64Array(n);
-        for (var i = 0; i < n; i++) {
-            hash[i] = Math.floor(rng() * m);
-            sign[i] = rng() < 0.5 ? 1 : -1;
-        }
-        var recovered = new Float64Array(n * n * 3);
-        for (var ch = 0; ch < 3; ch++) {
-            var sketch = new Float64Array(m * n);
-            for (var r = 0; r < n; r++)
-                for (var c = 0; c < n; c++)
-                    sketch[hash[r] * n + c] += sign[r] * data[(r * n + c) * 4 + ch];
-            for (var r = 0; r < n; r++)
-                for (var c = 0; c < n; c++)
-                    recovered[(ch * n + r) * n + c] = sign[r] * sketch[hash[r] * n + c];
-        }
-        return recovered;
-    }
-
-    // Median-of-k count sketches
-    function countSketchMedian(data, n, m, baseSeed) {
-        var copies = [];
-        for (var t = 0; t < NUM_SKETCHES; t++)
-            copies.push(countSketchOnce(data, n, m, prng(baseSeed + t * 7919)));
-
-        var result = new Uint8ClampedArray(data.length);
-        var vals = new Float64Array(NUM_SKETCHES);
-        for (var ch = 0; ch < 3; ch++)
-            for (var r = 0; r < n; r++)
-                for (var c = 0; c < n; c++) {
-                    for (var t = 0; t < NUM_SKETCHES; t++)
-                        vals[t] = copies[t][(ch * n + r) * n + c];
-                    vals.sort();
-                    var med = vals[Math.floor(NUM_SKETCHES / 2)];
-                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(med)));
-                }
-        for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
-        return result;
-    }
-
-    // Single Gaussian sketch recovery (returns Float64Array per channel)
-    function gaussianSketchOnce(data, n, m, rng) {
-        var scale = 1.0 / Math.sqrt(m);
-        var S = new Float64Array(m * n);
-        for (var i = 0; i < m * n; i++) S[i] = gaussRand(rng) * scale;
-
-        var recovered = new Float64Array(n * n * 3);
-        for (var ch = 0; ch < 3; ch++) {
-            var sketched = new Float64Array(m * n);
-            for (var c = 0; c < n; c++)
-                for (var i = 0; i < m; i++) {
-                    var sum = 0;
-                    for (var k = 0; k < n; k++)
-                        sum += S[i * n + k] * data[(k * n + c) * 4 + ch];
-                    sketched[i * n + c] = sum;
-                }
-            for (var c = 0; c < n; c++)
-                for (var i = 0; i < n; i++) {
-                    var sum = 0;
-                    for (var k = 0; k < m; k++)
-                        sum += S[k * n + i] * sketched[k * n + c];
-                    recovered[(ch * n + i) * n + c] = sum;
-                }
-        }
-        return recovered;
-    }
-
-    // Mean-of-k Gaussian sketches
-    function gaussianSketchMean(data, n, m, baseSeed) {
-        var accum = new Float64Array(n * n * 3);
-        for (var t = 0; t < NUM_SKETCHES; t++) {
-            var rec = gaussianSketchOnce(data, n, m, prng(baseSeed + t * 7919));
-            for (var i = 0; i < accum.length; i++) accum[i] += rec[i];
-        }
-        var result = new Uint8ClampedArray(data.length);
-        for (var ch = 0; ch < 3; ch++)
-            for (var r = 0; r < n; r++)
-                for (var c = 0; c < n; c++) {
-                    var v = accum[(ch * n + r) * n + c] / NUM_SKETCHES;
-                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(v)));
-                }
-        for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
-        return result;
-    }
-
-    // Single Rademacher sketch recovery (S with +/-1 entries)
-    function rademacherSketchOnce(data, n, m, rng) {
-        var scale = 1.0 / Math.sqrt(m);
-        var S = new Float64Array(m * n);
-        for (var i = 0; i < m * n; i++) S[i] = (rng() < 0.5 ? 1 : -1) * scale;
-
-        var recovered = new Float64Array(n * n * 3);
-        for (var ch = 0; ch < 3; ch++) {
-            var sketched = new Float64Array(m * n);
-            for (var c = 0; c < n; c++)
-                for (var i = 0; i < m; i++) {
-                    var sum = 0;
-                    for (var k = 0; k < n; k++)
-                        sum += S[i * n + k] * data[(k * n + c) * 4 + ch];
-                    sketched[i * n + c] = sum;
-                }
-            for (var c = 0; c < n; c++)
-                for (var i = 0; i < n; i++) {
-                    var sum = 0;
-                    for (var k = 0; k < m; k++)
-                        sum += S[k * n + i] * sketched[k * n + c];
-                    recovered[(ch * n + i) * n + c] = sum;
-                }
-        }
-        return recovered;
-    }
-
-    // Mean-of-k Rademacher sketches
-    function rademacherSketchMean(data, n, m, baseSeed) {
-        var accum = new Float64Array(n * n * 3);
-        for (var t = 0; t < NUM_SKETCHES; t++) {
-            var rec = rademacherSketchOnce(data, n, m, prng(baseSeed + t * 7919));
-            for (var i = 0; i < accum.length; i++) accum[i] += rec[i];
-        }
-        var result = new Uint8ClampedArray(data.length);
-        for (var ch = 0; ch < 3; ch++)
-            for (var r = 0; r < n; r++)
-                for (var c = 0; c < n; c++) {
-                    var v = accum[(ch * n + r) * n + c] / NUM_SKETCHES;
-                    result[(r * n + c) * 4 + ch] = Math.max(0, Math.min(255, Math.round(v)));
-                }
-        for (var i = 0; i < n * n; i++) result[i * 4 + 3] = 255;
-        return result;
-    }
-
-    function init() {
-        var img = document.querySelector('.hero-photo');
-        var canvas = document.getElementById('sketch-canvas');
-        var ctx = canvas.getContext('2d');
-
-        // Draw image to canvas replicating CSS cover + scale(1.3) + object-position
-        var iw = img.naturalWidth, ih = img.naturalHeight;
-        var s = Math.max(SIZE / iw, SIZE / ih) * 1.3;
-        var dw = iw * s, dh = ih * s;
-        var dx = (SIZE - dw) / 2;
-        var dy = (SIZE - dh) / 2;
-        ctx.drawImage(img, dx, dy, dw, dh);
-
-        var imgData = ctx.getImageData(0, 0, SIZE, SIZE);
-        var pixels = imgData.data;
-
-        // Precompute sketched images (median-of-9 for count, mean-of-9 for Gaussian/Rademacher)
-        countResult = countSketchMedian(pixels, SIZE, SKETCH_M, 42);
-        gaussianResult = gaussianSketchMean(pixels, SIZE, SKETCH_M, 123);
-        rademacherResult = rademacherSketchMean(pixels, SIZE, SKETCH_M, 256);
-    }
-
-    var img = document.querySelector('.hero-photo');
-    if (img.complete && img.naturalWidth > 0) init();
-    else img.addEventListener('load', init);
-
-    window.showSketch = function(type, btn) {
-        document.querySelectorAll('.sketch-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-
-        var canvas = document.getElementById('sketch-canvas');
-        var ctx = canvas.getContext('2d');
-        var photo = document.querySelector('.hero-photo');
-
-        if (type === 'original') {
-            canvas.style.display = 'none';
-            photo.style.visibility = 'visible';
-        } else {
-            var pixels = type === 'count' ? countResult : type === 'gaussian' ? gaussianResult : rademacherResult;
-            if (pixels) {
-                var imgData = new ImageData(pixels, SIZE, SIZE);
-                ctx.putImageData(imgData, 0, 0);
-                canvas.style.display = 'block';
-                photo.style.visibility = 'hidden';
-            }
-        }
-    };
-})();
+// Sketch demo — swap precomputed images
+function showSketch(src, btn) {
+    document.querySelectorAll('.sketch-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('hero-photo').src = src;
+}
 </script>
 
 </body>
