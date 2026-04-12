@@ -1,0 +1,59 @@
+# Skills & Lessons Learned
+
+## Changes Log
+
+### Session: 2026-04-12
+
+1. **Swapped profile photo** from `img/NewProfile.jpg` to `img/selfie.jpg` (moved from repo root to `img/`).
+2. **Added dark/light mode toggle** — sun/moon button in the nav bar with `localStorage` persistence. Light theme defined via `[data-theme="light"]` CSS custom properties.
+3. **Updated CV link** from `CV_Tahseen_Rabbani_August2025.pdf` to `CV_Tahseen_Rabbani_April2026.pdf` (two locations: nav and footer).
+4. **Renamed "Published Papers"** section to **"Selected Works"**.
+5. **Fixed photo cropping** — multiple iterations (see lessons below).
+6. **Tightened hero-to-news spacing** — reduced hero bottom padding from 5rem to 0.
+7. **Updated CV** to `CV_Tahseen_Rabbani_Current.pdf`, removed old versions.
+8. **Added sketch demo** — toggle buttons below profile photo showing count sketch and Gaussian sketch reconstructions (1D row sketching, m=80 out of 220). Uses seeded PRNG for deterministic results, precomputed on image load.
+9. **Improved sketch quality** — median-of-5 for count sketch (kills heavy-tailed collision noise), mean-of-5 for Gaussian (reduces variance while staying unbiased).
+10. **Fixed sketch canvas alignment** — canvas image was shifted down vs. the CSS-rendered original (see lessons below).
+
+---
+
+## Lessons Learned
+
+### Photo cropping in circular containers
+- **The selfie is landscape-oriented.** With `object-fit: cover` on a square container, the image scales to fill width first, leaving very little vertical overflow. This means `object-position` Y-axis changes have almost no visible effect.
+- **First failed approach:** Changing `object-position` from `center 25%` to `center 5%` — barely visible difference because there was no vertical overflow to reposition.
+- **Second failed approach:** Using a wrapper div with `width: 100%; height: auto` and `transform: scale(1.4) translateY(-8%)`. This zoomed and shifted the image, but since `height: auto` made the image shorter than the 220px container, it created black empty space at the bottom of the circle.
+- **Working approach:** Wrapper div with `overflow: hidden` + image using `width: 100%; height: 100%; object-fit: cover; object-position: center 35%; transform: scale(1.3)`. The `object-fit: cover` guarantees no gaps, the `scale(1.3)` creates additional overflow for `object-position` to work with, and `object-position` controls which part of the image is visible.
+- **Key takeaway:** For landscape photos in square/circle crops, you need to *create* vertical overflow (via `scale()`) before `object-position` can meaningfully shift the vertical framing.
+
+### Canvas replication of CSS image cropping
+- When drawing an image to a canvas to replicate CSS `object-fit: cover` + `transform: scale()`, you must understand the order of operations:
+  1. `object-fit: cover` scales the image so both dimensions >= container. For a **landscape** image in a square container, height matches exactly and width overflows (cropped centered).
+  2. `object-position: center 35%` — the Y component is **irrelevant** when there's no vertical excess after cover fit (landscape in square). Only horizontal positioning matters.
+  3. `transform: scale(1.3)` zooms from `transform-origin: center center` (default). The center of the element stays fixed.
+- **The bug:** Used `dy = -(dh - SIZE) * 0.35` (incorrectly applying object-position percentage to the scale overflow). Correct formula: `dy = (SIZE - dh) / 2` (simply center the scaled image, since scale zooms from center).
+- **Key takeaway:** Don't conflate `object-position` with `transform-origin`. They operate at different stages of the rendering pipeline.
+
+### Sketch variance reduction
+- **Count sketch** recovery is unbiased but heavy-tailed (hash collisions). Median-of-k independent sketches is the standard approach — kills outliers while preserving the signal.
+- **Gaussian sketch** recovery (S^T S x) is unbiased with lighter tails. Mean-of-k reduces variance by 1/k.
+- Both use different PRNG seeds per copy (base_seed + t * 7919) to ensure independence.
+
+### Dark/light mode implementation
+- Use CSS custom properties on `:root` for dark (default) and `[data-theme="light"]` for the override.
+- Toggle button shows sun icon in dark mode, moon icon in light mode (via CSS display toggling `.icon-sun` / `.icon-moon`).
+- Persist choice with `localStorage.setItem('theme', ...)` and restore on page load with an IIFE in the script block.
+- Light mode colors should maintain sufficient contrast — used darker accent blues (`#3a6fa0`) and warmer golds (`#9a7530`) compared to dark mode.
+
+---
+
+## Tips for Future Iterations
+
+- **Always `git pull` before making changes** — the user often pushes updates (photos, CV files) directly to the repo.
+- **The site is a single `index.html` file** with inline CSS and JS. No build step, no framework.
+- **Fonts:** DM Serif Display (headings) + Inter (body), loaded from Google Fonts.
+- **Nav sections:** News, Papers (id="papers"), Workshop (id="workshop"), Artwork, CV (links to PDF in `docs/`).
+- **Image files live in `img/`**, artwork in `img/portfolio/`.
+- **The site uses GitHub Pages** — changes are live after pushing to `master`.
+- **Existing interactive features:** scroll fade-in via IntersectionObserver, lightbox for artwork, mobile hamburger nav, sketch demo (count/Gaussian), dark/light mode toggle.
+- **When testing visual changes:** the `WebFetch` tool cannot visually render pages — it only reads HTML/CSS. For layout bugs, reason through the CSS math (element dimensions, transforms, overflow) rather than relying on fetch results.
