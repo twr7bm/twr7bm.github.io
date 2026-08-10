@@ -165,18 +165,33 @@
     .rail-menu { display: none; }
 
     @media (max-width: 860px) {
-        .shell { grid-template-columns: 1fr; gap: 0; padding-top: 26px; }
-        .rail { position: static; max-height: none; overflow: visible; padding-bottom: 30px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
-        .photo-card { max-width: 260px; }
+        .shell { grid-template-columns: 1fr; gap: 0; padding-top: 22px; }
+        .rail { position: static; max-height: none; overflow: visible; padding-bottom: 28px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+        .photo-card { max-width: 380px; margin: 0 auto; }
         .name { margin-top: 22px; }
-        .bio { max-width: 62ch; }
+        .bio { max-width: 64ch; }
+        /* touch targets >= ~44px */
+        .tb-nav a { padding: 12px 3px; }
+        .theme-toggle { width: 42px; height: 42px; font-size: 16px; }
+        .sketch-btn { padding: 9px 15px; font-size: 13px; }
+        .socials a { padding: 6px; }
+        .socials svg { width: 21px; height: 21px; }
     }
     @media (max-width: 560px) {
         .artwork-grid { grid-template-columns: repeat(2, 1fr); }
-        .news-year { grid-template-columns: 1fr; gap: 6px; }
+        .news-year { grid-template-columns: 1fr; gap: 5px; }
         .tb-brand { display: none; }
-        .tb-nav { gap: 16px; margin-right: auto; }
-        .tb-nav a { font-size: 0.86rem; }
+        .tb-nav { gap: 15px; margin-right: auto; }
+        .tb-nav a { font-size: 0.95rem; }
+        /* readable body type (16px+) per mobile guidance */
+        .bio { font-size: 1rem; line-height: 1.6; }
+        .news-year h3 { font-size: 1.02rem; }
+        .news-year li { font-size: 1rem; line-height: 1.55; }
+        .pub h4 { font-size: 1.16rem; }
+        .pub-desc { font-size: 1rem; }
+        .pub-authors { font-size: 0.9rem; }
+        .sketch-note { font-size: 12.5px; line-height: 1.5; }
+        .section-title { font-size: 1.5rem; }
     }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { animation: none !important; transition: none !important; }

@@ -110,3 +110,12 @@
   luminance through the site palette (ink -> rust -> ember -> paper), so it reads
   as a bold rust print that matches the accent. Final toggle: original / count /
   halftone / riso / low-rank.
+
+### Session: 2026-08-10 (mobile polish)
+- Cooled the palette (rust -> cool blue accent + cooler neutrals) and moved the
+  section nav from the internally-scrollable left rail into a sticky top bar.
+- Mobile pass per current guidance: body/reading text bumped to ~16px, tap
+  targets >= 44px (nav links, sketch pills, theme toggle, social icons),
+  full-width hero photo. Verified SW==CW==360 (no horizontal overflow) via an
+  in-page probe rendered inside a 360px iframe (headless clamps the *top-level*
+  window to 500px min, so true phone widths must be tested via an iframe).
