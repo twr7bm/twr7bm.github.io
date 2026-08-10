@@ -99,9 +99,9 @@
     .frame-mark.tr { top: -1px; right: -1px; border-top: 1.5px solid var(--rust); border-right: 1.5px solid var(--rust); }
     .frame-mark.bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid var(--rust); border-left: 1.5px solid var(--rust); }
     .frame-mark.br { bottom: -1px; right: -1px; border-bottom: 1.5px solid var(--rust); border-right: 1.5px solid var(--rust); }
-    .sketch-buttons { display: flex; gap: 6px; margin-top: 12px; }
+    .sketch-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
     .sketch-btn {
-        flex: 1; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; padding: 8px 6px;
+        flex: 1 1 auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.02em; padding: 7px 4px;
         background: none; border: 1px solid var(--line); border-radius: var(--r); color: var(--ink-2);
         cursor: pointer; transition: all .2s;
     }
@@ -238,11 +238,12 @@
                 <button class="sketch-btn" onclick="showSketch('img/sketch_count.png', this)">count</button>
                 <button class="sketch-btn" onclick="showSketch('img/sketch_halftone.png', this)">halftone</button>
                 <button class="sketch-btn" onclick="showSketch('img/sketch_pencil.png', this)">pencil</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_lowrank.png', this)">low-rank</button>
             </div>
             <p class="sketch-caption">
                 &#47;&#47; my face, run through a few sketches &mdash; a randomized <b>count</b> sketch
-                (recovered pixel-wise), a <b>halftone</b> screen, and a <b>pencil</b> pass. Sketching
-                happens to be one of the things I study.
+                (recovered pixel-wise), a <b>halftone</b> screen, a <b>pencil</b> pass, and a
+                <b>low-rank</b> (rank-12 SVD) projection. Sketching happens to be one of the things I study.
             </p>
         </div>
         <div class="hero-text">

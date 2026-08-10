@@ -12,6 +12,7 @@ operation and look identical, so only Count is kept as the algorithmic nod):
   halftone  : classic newsprint dot screen (dot area proportional to darkness),
               tinted to the site's paper/ink palette.
   pencil    : color-dodge pencil-sketch (grayscale / blurred-inverse), tinted.
+  lowrank   : rank-r truncated SVD per channel -> smooth "compressed" ghost.
 
 Deterministic. Requires numpy + pillow.
 
@@ -68,6 +69,16 @@ def make_halftone(src, cell=5, ss=4):
     return tint(small)
 
 
+def make_lowrank(rgb, r=12):
+    # keep only the top-r singular values per channel -> smooth, "compressed" ghost
+    out = np.empty_like(rgb)
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        for c in range(3):
+            U, S, Vt = np.linalg.svd(rgb[..., c].astype(np.float64), full_matrices=False)
+            out[..., c] = (U[:, :r] * S[:r]) @ Vt[:r]
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def make_pencil(src, sigma=6):
     g = src.convert("L")
     inv = ImageOps.invert(g).filter(ImageFilter.GaussianBlur(sigma))
@@ -88,6 +99,8 @@ def main():
     print("  halftone -> img/sketch_halftone.png")
     Image.fromarray(make_pencil(src)).save("img/sketch_pencil.png")
     print("  pencil   -> img/sketch_pencil.png")
+    Image.fromarray(make_lowrank(rgb)).save("img/sketch_lowrank.png")
+    print("  lowrank  -> img/sketch_lowrank.png")
 
 
 if __name__ == "__main__":
