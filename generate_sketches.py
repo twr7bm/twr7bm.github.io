@@ -2,7 +2,7 @@
 """
 Generate the sketch portraits used on the hero photo toggle.
 
-Three deliberately *distinct* looks (Count/Gaussian random sketches are the same
+Four deliberately *distinct* looks (Count/Gaussian random sketches are the same
 operation and look identical, so only Count is kept as the algorithmic nod):
 
   count     : randomized count-sketch, reconstructed PIXEL-WISE (whole image
@@ -11,7 +11,7 @@ operation and look identical, so only Count is kept as the algorithmic nod):
               heavy-tailed collision noise. Keeps color -> speckled grain.
   halftone  : classic newsprint dot screen (dot area proportional to darkness),
               tinted to the site's paper/ink palette.
-  pencil    : color-dodge pencil-sketch (grayscale / blurred-inverse), tinted.
+  riso      : tritone "risograph" screen-print in the site rust palette.
   lowrank   : rank-r truncated SVD per channel -> smooth "compressed" ghost.
 
 Deterministic. Requires numpy + pillow.
@@ -19,11 +19,13 @@ Deterministic. Requires numpy + pillow.
     python3 generate_sketches.py
 """
 import numpy as np
-from PIL import Image, ImageFilter, ImageDraw, ImageOps
+from PIL import Image, ImageDraw, ImageOps
 
 SRC   = "img/sketch_original.png"
 PAPER = np.array([244, 243, 238], np.float32)   # --paper
-INK   = np.array([ 23,  24,  28], np.float32)    # --ink
+INK   = np.array([ 23,  24,  28], np.float32)   # --ink
+RUST  = np.array([194,  65,  12], np.float32)   # --rust
+EMBER = np.array([255, 138,  61], np.float32)   # --ember
 
 C_M, C_K, C_SEED = 22000, 9, 7919               # count sketch
 
@@ -79,13 +81,16 @@ def make_lowrank(rgb, r=12):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def make_pencil(src, sigma=6):
-    g = src.convert("L")
-    inv = ImageOps.invert(g).filter(ImageFilter.GaussianBlur(sigma))
-    gn = np.asarray(g, np.float32)
-    bn = np.asarray(inv, np.float32)
-    pencil = np.where(bn >= 255, 255.0, np.minimum(255.0, gn * 255.0 / (255.0 - bn + 1e-3)))
-    return tint(pencil)
+def make_riso(src):
+    # tritone "risograph" screen-print in the site palette:
+    # ink shadows -> rust mids -> ember -> paper highlights
+    g = np.asarray(ImageOps.autocontrast(src.convert("L"), cutoff=1), np.float32) / 255.0
+    pos = np.array([0.0, 0.5, 0.8, 1.0])
+    stops = np.array([INK, RUST, EMBER, PAPER], np.float32)
+    out = np.empty(g.shape + (3,), np.float32)
+    for c in range(3):
+        out[..., c] = np.interp(g, pos, stops[:, c])
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def main():
@@ -97,8 +102,8 @@ def main():
     print("  count    -> img/sketch_count.png")
     Image.fromarray(make_halftone(src)).save("img/sketch_halftone.png")
     print("  halftone -> img/sketch_halftone.png")
-    Image.fromarray(make_pencil(src)).save("img/sketch_pencil.png")
-    print("  pencil   -> img/sketch_pencil.png")
+    Image.fromarray(make_riso(src)).save("img/sketch_riso.png")
+    print("  riso     -> img/sketch_riso.png")
     Image.fromarray(make_lowrank(rgb)).save("img/sketch_lowrank.png")
     print("  lowrank  -> img/sketch_lowrank.png")
 

@@ -103,3 +103,10 @@
   `count` (colored grain), `halftone` (newsprint dot screen), `pencil`
   (color-dodge sketch — also nods to the Artwork section). Halftone/pencil are
   tinted to the paper/ink palette. See generate_sketches.py.
+
+### Session: 2026-08-10 (sketch tweaks)
+- Added `lowrank` (rank-12 truncated SVD, smooth "compressed ghost").
+- Replaced `pencil` with `riso` — a tritone "risograph" screen-print mapping
+  luminance through the site palette (ink -> rust -> ember -> paper), so it reads
+  as a bold rust print that matches the accent. Final toggle: original / count /
+  halftone / riso / low-rank.
