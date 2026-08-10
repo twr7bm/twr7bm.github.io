@@ -32,3 +32,13 @@
   caused horizontal banding. See generate_sketches.py.
 - **Cleanup**: removed unreferenced Bootstrap/Freelancer/jQuery/Font-Awesome/less
   and glyphicon font dirs; resolved a committed merge conflict in README.md.
+
+### Session: 2026-08-10 — v3 redesign + honest sketches
+- **Redesign (v3)** away from the editorial-serif "millennial intellectual" look:
+  single warm sans (Hanken Grotesk, no serif/mono), a sticky **left-rail** layout
+  (photo + sketch toggle + bio + nav + socials) with a wide content column so the
+  page fills the width instead of a narrow centered column with big blank borders.
+  Soft rounded corners, subtle dividers — minimal, not brutalist. Kept dark/light.
+- **Sketches are now all genuine projection+recovery** (dropped the halftone/riso
+  filters): count (random hashing), DCT (block cosine), wavelet (Haar), low-rank
+  (SVD) — four bases for the same compress-then-recover idea.

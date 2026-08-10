@@ -10,192 +10,158 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
     <style>
     :root {
-        --paper:   #f4f3ee;
-        --paper-2: #eeece5;
-        --ink:     #17181c;
-        --ink-2:   #3a3d44;
-        --muted:   #6a6d76;
-        --line:    rgba(23,24,28,0.14);
-        --line-2:  rgba(23,24,28,0.30);
-        --rust:    #c2410c;
-        --ember:   #d4530f;
-        --serif: 'Instrument Serif', 'Times New Roman', serif;
-        --sans:  'Instrument Sans', system-ui, -apple-system, sans-serif;
-        --mono:  'IBM Plex Mono', ui-monospace, Menlo, monospace;
-        --maxw: 1080px;
-        --r: 2px;
+        --bg:      #f7f5f0;
+        --panel:   #ffffff;
+        --panel-2: #efece5;
+        --ink:     #1b1a17;
+        --ink-2:   #56534d;
+        --muted:   #8c887f;
+        --line:    rgba(27,26,23,0.10);
+        --line-2:  rgba(27,26,23,0.17);
+        --accent:  #c2410c;
+        --accent-soft: rgba(194,65,12,0.10);
+        --font: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
+        --r: 10px;
+        --maxw: 1240px;
         --ease: cubic-bezier(.2,.6,.2,1);
     }
     [data-theme="dark"] {
-        --paper:   #131319;
-        --paper-2: #1b1b23;
-        --ink:     #ecebe4;
-        --ink-2:   #c3c2bb;
-        --muted:   #8b8b96;
-        --line:    rgba(255,255,255,0.13);
-        --line-2:  rgba(255,255,255,0.26);
-        --rust:    #ef7a45;
-        --ember:   #ff8a3d;
+        --bg:      #1a1917;
+        --panel:   #232220;
+        --panel-2: #2a2825;
+        --ink:     #efece5;
+        --ink-2:   #c1beb5;
+        --muted:   #8c887e;
+        --line:    rgba(255,255,255,0.10);
+        --line-2:  rgba(255,255,255,0.18);
+        --accent:  #ef8a5a;
+        --accent-soft: rgba(239,138,90,0.14);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
     body {
-        font-family: var(--sans); background: var(--paper); color: var(--ink);
-        line-height: 1.62; -webkit-font-smoothing: antialiased; overflow-x: hidden;
-        transition: background .4s, color .4s;
-        background-image:
-            radial-gradient(120% 80% at 100% 0%, rgba(194,65,12,0.05), transparent 55%),
-            radial-gradient(90% 70% at 0% 100%, rgba(23,24,28,0.03), transparent 60%);
-        background-attachment: fixed;
+        font-family: var(--font); background: var(--bg); color: var(--ink);
+        line-height: 1.6; font-weight: 400; -webkit-font-smoothing: antialiased;
+        transition: background .35s, color .35s;
     }
     a { color: inherit; text-decoration: none; }
-    ::selection { background: var(--rust); color: #fff; }
-    h1,h2,h3,h4 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; line-height: 1.05; }
-    .ital, em { font-style: italic; }
+    ::selection { background: var(--accent); color: #fff; }
+    h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 
-    /* nav */
-    nav {
-        position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center;
-        gap: 22px; padding: 0 clamp(18px,4vw,36px); height: 60px;
-        background: color-mix(in srgb, var(--paper) 86%, transparent);
-        backdrop-filter: saturate(120%) blur(7px); -webkit-backdrop-filter: saturate(120%) blur(7px);
-        border-bottom: 1px solid transparent; transition: border-color .3s, background .4s;
+    /* ---------- shell ---------- */
+    .shell {
+        display: grid; grid-template-columns: 296px 1fr; gap: clamp(36px, 5vw, 76px);
+        max-width: var(--maxw); margin: 0 auto; padding: clamp(36px, 6vh, 60px) clamp(20px, 4vw, 48px) 0;
     }
-    nav.scrolled { border-bottom: 1px solid var(--line); }
-    .nav-brand { font-family: var(--serif); font-size: 1.4rem; letter-spacing: -0.02em; margin-right: auto; }
-    .nav-links { list-style: none; display: flex; gap: 28px; align-items: center; }
-    .nav-links a { font-family: var(--serif); font-size: 1.02rem; color: var(--ink-2); transition: color .2s; }
-    .nav-links a em { font-family: var(--mono); font-style: normal; font-size: 0.6rem; color: var(--muted); vertical-align: super; margin-right: 3px; }
-    .nav-links a:hover { color: var(--rust); }
-    .theme-toggle, .nav-toggle { background: none; border: 1px solid var(--line-2); border-radius: var(--r); cursor: pointer; color: var(--ink); font-family: var(--mono); }
-    .theme-toggle { width: 34px; height: 34px; font-size: 15px; display: grid; place-items: center; }
+
+    /* ---------- left rail ---------- */
+    .rail { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 40px); overflow-y: auto; scrollbar-width: none; padding-bottom: 20px; }
+    .rail::-webkit-scrollbar { display: none; }
+    .photo-card { width: 100%; }
+    .photo { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 14px; overflow: hidden; background: var(--panel-2); box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 30px -18px rgba(0,0,0,.35); }
+    .photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+    .sketch-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .sketch-btn {
+        font-family: var(--font); font-size: 12px; font-weight: 500; padding: 5px 11px;
+        border: 1px solid var(--line-2); border-radius: 999px; background: transparent; color: var(--ink-2);
+        cursor: pointer; transition: all .2s;
+    }
+    .sketch-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .sketch-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+    .sketch-note { font-size: 11.5px; line-height: 1.45; color: var(--muted); margin-top: 10px; }
+
+    .name { font-size: clamp(1.55rem, 3vw, 1.95rem); margin-top: 26px; }
+    .role { font-size: 0.86rem; font-weight: 500; color: var(--muted); margin-top: 4px; }
+    .role a { color: var(--accent); }
+    .bio { font-size: 0.92rem; color: var(--ink-2); margin-top: 16px; }
+    .bio a { color: var(--ink); font-weight: 500; border-bottom: 1px solid var(--line-2); transition: color .2s, border-color .2s; }
+    .bio a:hover { color: var(--accent); border-color: var(--accent); }
+
+    .rail-nav { display: flex; flex-wrap: wrap; gap: 7px 16px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .rail-nav a { font-size: 0.9rem; font-weight: 500; color: var(--ink-2); transition: color .2s; }
+    .rail-nav a:hover { color: var(--accent); }
+
+    .rail-foot { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
+    .socials { display: flex; gap: 13px; margin-right: auto; }
+    .socials a { color: var(--muted); transition: color .2s, transform .2s; }
+    .socials a:hover { color: var(--accent); transform: translateY(-2px); }
+    .socials svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+    .theme-toggle { width: 32px; height: 32px; border: 1px solid var(--line-2); border-radius: 8px; background: transparent; color: var(--ink); cursor: pointer; font-size: 14px; display: grid; place-items: center; }
     .theme-toggle .icon-moon { display: none; }
     [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
     [data-theme="dark"] .theme-toggle .icon-moon { display: inline; }
-    .nav-toggle { display: none; flex-direction: column; gap: 4px; padding: 9px 10px; }
-    .nav-toggle span { width: 20px; height: 2px; background: var(--ink); border-radius: 2px; }
 
-    /* layout */
-    section { max-width: var(--maxw); margin: 0 auto; padding: clamp(56px,8vw,96px) clamp(18px,5vw,36px); }
-    .section-title { font-size: clamp(1.8rem,4vw,2.8rem); margin-bottom: 8px; }
-    .kicker { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--rust); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .kicker::after { content: ""; flex: 0 0 40px; height: 1px; background: var(--line-2); }
-
-    /* hero */
-    .hero { max-width: var(--maxw); margin: 0 auto; padding: clamp(108px,15vh,150px) clamp(18px,5vw,36px) clamp(18px,3vw,32px); }
-    #news { padding-top: clamp(26px,4vw,44px); }
-    .hero-content { display: grid; grid-template-columns: 300px 1fr; gap: clamp(32px,6vw,68px); align-items: start; }
-    .hero-photo-col, .hero-text { min-width: 0; }
-    .hero-photo-col { position: relative; }
-    .hero-photo-wrapper { position: relative; border: 1px solid var(--ink); border-radius: var(--r); overflow: hidden; aspect-ratio: 1/1; background: var(--paper-2); }
-    .hero-photo { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
-    .frame-mark { position: absolute; width: 13px; height: 13px; pointer-events: none; z-index: 2; }
-    .frame-mark.tl { top: -1px; left: -1px; border-top: 1.5px solid var(--rust); border-left: 1.5px solid var(--rust); }
-    .frame-mark.tr { top: -1px; right: -1px; border-top: 1.5px solid var(--rust); border-right: 1.5px solid var(--rust); }
-    .frame-mark.bl { bottom: -1px; left: -1px; border-bottom: 1.5px solid var(--rust); border-left: 1.5px solid var(--rust); }
-    .frame-mark.br { bottom: -1px; right: -1px; border-bottom: 1.5px solid var(--rust); border-right: 1.5px solid var(--rust); }
-    .sketch-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 12px; }
-    .sketch-btn {
-        flex: 1 1 auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.02em; padding: 7px 4px;
-        background: none; border: 1px solid var(--line); border-radius: var(--r); color: var(--ink-2);
-        cursor: pointer; transition: all .2s;
-    }
-    .sketch-btn:hover { border-color: var(--line-2); color: var(--ink); }
-    .sketch-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-    .sketch-caption { font-family: var(--mono); font-size: 10.5px; line-height: 1.5; color: var(--muted); margin-top: 12px; }
-    .sketch-caption b { color: var(--rust); font-weight: 500; }
-
-    .hero-text h1 { font-size: clamp(2.8rem,7vw,4.6rem); line-height: 0.98; margin-bottom: 8px; }
-    .hero-title { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 22px; }
-    .hero-title a { color: var(--rust); }
-    .hero-title { overflow-wrap: break-word; }
-    .hero-bio { font-size: clamp(1.05rem,1.6vw,1.2rem); color: var(--ink-2); max-width: 60ch; overflow-wrap: break-word; }
-    .news-year ul { min-width: 0; }
-    .news-year li, .pub-desc, .pub-authors { overflow-wrap: break-word; }
-    .hero-bio a { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: color .2s, border-color .2s; }
-    .hero-bio a:hover { color: var(--rust); border-color: var(--rust); }
-    .hero-links { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 26px; }
-    .hero-links a { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; color: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 14px; transition: all .2s; }
-    .hero-links a:hover { border-color: var(--rust); color: var(--rust); }
-    .hero-links svg { width: 15px; height: 15px; fill: currentColor; }
+    /* ---------- content ---------- */
+    .content { min-width: 0; padding-bottom: 60px; }
+    .content > section { padding: 6px 0 clamp(38px, 5vw, 58px); }
+    .section-title { font-size: clamp(1.35rem, 2.4vw, 1.7rem); margin-bottom: 22px; display: inline-block; }
+    .section-title::after { content: ""; display: block; width: 30px; height: 2px; background: var(--accent); border-radius: 2px; margin-top: 8px; }
 
     /* news */
-    .news-year { display: grid; grid-template-columns: 130px 1fr; gap: 20px; padding: 26px 0; border-top: 1px solid var(--line); }
-    .news-year:first-of-type { border-top: 1px solid var(--ink); }
-    .news-year h3 { font-family: var(--mono); font-weight: 500; font-size: 15px; letter-spacing: 0.06em; color: var(--rust); position: sticky; top: 110px; align-self: start; }
-    .news-year ul { list-style: none; display: flex; flex-direction: column; gap: 14px; }
-    .news-year li { color: var(--ink-2); font-size: 1rem; padding-left: 18px; position: relative; }
-    .news-year li::before { content: "▸"; position: absolute; left: 0; color: var(--rust); font-size: 0.8em; top: 0.35em; }
+    .news-year { padding: 16px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 62px 1fr; gap: 14px; }
+    .news-year:first-of-type { border-top: none; padding-top: 0; }
+    .news-year h3 { font-size: 0.95rem; font-weight: 700; color: var(--accent); }
+    .news-year ul { list-style: none; display: flex; flex-direction: column; gap: 11px; min-width: 0; }
+    .news-year li { font-size: 0.95rem; color: var(--ink-2); overflow-wrap: break-word; }
     .news-year li b { color: var(--ink); font-weight: 600; }
     .news-year a { color: var(--ink); border-bottom: 1px solid var(--line-2); transition: color .2s, border-color .2s; }
-    .news-year a:hover { color: var(--rust); border-color: var(--rust); }
+    .news-year a:hover { color: var(--accent); border-color: var(--accent); }
 
     /* publications */
-    .pub-list { border-top: 1px solid var(--ink); }
-    .pub-card { padding: 24px 0; border-bottom: 1px solid var(--line); transition: padding-left .25s; }
-    .pub-card:hover { padding-left: 10px; }
-    .pub-venue { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rust); border: 1px solid var(--line-2); border-radius: var(--r); padding: 3px 9px; display: inline-block; margin-bottom: 12px; }
-    .pub-card h4 { font-size: clamp(1.3rem,2.4vw,1.7rem); line-height: 1.15; margin-bottom: 8px; }
-    .pub-card h4 a { transition: color .2s; }
-    .pub-card h4 a:hover { color: var(--rust); }
-    .pub-authors { font-size: 0.9rem; color: var(--muted); margin-bottom: 8px; }
-    .pub-authors .me { color: var(--ink); font-weight: 600; border-bottom: 1.5px solid var(--rust); }
-    .pub-desc { font-size: 0.98rem; color: var(--ink-2); max-width: 76ch; }
-    .pub-desc a { color: var(--rust); border-bottom: 1px solid var(--line-2); }
+    .pub { padding: 18px 0; border-top: 1px solid var(--line); }
+    .pub:first-child { border-top: none; padding-top: 0; }
+    .venue { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; margin-bottom: 9px; }
+    .pub h4 { font-size: 1.08rem; font-weight: 600; line-height: 1.25; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .pub h4 a { transition: color .2s; }
+    .pub h4 a:hover { color: var(--accent); }
+    .pub-authors { font-size: 0.84rem; color: var(--muted); margin-bottom: 6px; overflow-wrap: break-word; }
+    .pub-authors .me { color: var(--ink); font-weight: 600; }
+    .pub-desc { font-size: 0.92rem; color: var(--ink-2); max-width: 74ch; }
+    .pub-desc a { color: var(--accent); border-bottom: 1px solid var(--line-2); }
 
     /* artwork */
-    .artwork-intro { font-family: var(--serif); font-style: italic; font-size: 1.3rem; color: var(--ink-2); margin-bottom: 28px; }
-    .artwork-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
-    .artwork-item { position: relative; aspect-ratio: 3/4; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
-    .artwork-item img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.15) contrast(1.02); transition: transform .5s var(--ease), filter .4s; }
-    .artwork-item:hover img { transform: scale(1.05); filter: grayscale(0) contrast(1); }
-    .artwork-overlay { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 14px; background: linear-gradient(to top, rgba(10,10,14,0.82), transparent 55%); opacity: 0; transition: opacity .3s; }
-    .artwork-item:hover .artwork-overlay { opacity: 1; }
-    .artwork-overlay span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: #fff; }
+    .artwork-intro { font-size: 0.98rem; color: var(--ink-2); margin-bottom: 20px; }
+    .artwork-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .art { position: relative; aspect-ratio: 3/4; border-radius: var(--r); overflow: hidden; cursor: pointer; background: var(--panel-2); }
+    .art img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease); }
+    .art:hover img { transform: scale(1.05); }
+    .art-cap { position: absolute; inset: 0; display: flex; align-items: flex-end; padding: 12px; background: linear-gradient(to top, rgba(15,12,10,.8), transparent 55%); opacity: 0; transition: opacity .3s; }
+    .art:hover .art-cap { opacity: 1; }
+    .art-cap span { font-size: 0.78rem; font-weight: 500; color: #fff; }
 
     /* lightbox */
-    .lightbox { position: fixed; inset: 0; z-index: 200; background: rgba(8,8,10,0.94); display: none; align-items: center; justify-content: center; flex-direction: column; padding: 40px; }
+    .lightbox { position: fixed; inset: 0; z-index: 200; background: rgba(12,11,10,.93); display: none; align-items: center; justify-content: center; flex-direction: column; padding: 40px; }
     .lightbox.active { display: flex; }
     .lightbox img { max-width: 90vw; max-height: 82vh; border-radius: var(--r); }
-    .lightbox-caption { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; color: #cfcfcf; margin-top: 18px; }
-    .lightbox-close { position: absolute; top: 22px; right: 28px; font-size: 34px; line-height: 1; color: #fff; background: none; border: none; cursor: pointer; font-family: var(--serif); }
+    .lightbox-cap { font-size: 0.85rem; color: #d8d5cf; margin-top: 16px; }
+    .lightbox-close { position: absolute; top: 20px; right: 26px; font-size: 30px; line-height: 1; color: #fff; background: none; border: none; cursor: pointer; }
 
     /* footer */
-    footer { max-width: var(--maxw); margin: 0 auto; padding: 40px clamp(18px,5vw,36px) 56px; border-top: 1px solid var(--ink); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
-    .footer-copy { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--muted); }
-    .footer-social { display: flex; gap: 16px; }
-    .footer-social a { color: var(--ink-2); transition: color .2s; }
-    .footer-social a:hover { color: var(--rust); }
-    .footer-social svg { width: 18px; height: 18px; fill: currentColor; }
+    .foot { border-top: 1px solid var(--line); padding-top: 22px; font-size: 0.82rem; color: var(--muted); }
 
     /* fade-in */
-    .fade-in { opacity: 0; transform: translateY(18px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .fade-in { opacity: 0; transform: translateY(14px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
     .fade-in.visible { opacity: 1; transform: none; }
 
-    :focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
+    /* mobile menu button (hidden on desktop) */
+    .rail-menu { display: none; }
 
-    @media (max-width: 820px) {
-        .nav-links { display: none; }
-        nav.nav-open .nav-links {
-            display: flex; flex-direction: column; gap: 18px; position: absolute; top: 100%; left: 0; right: 0;
-            background: var(--paper); border-bottom: 1px solid var(--line); padding: 24px clamp(18px,5vw,36px);
-        }
-        .nav-toggle { display: flex; }
-        .hero-content { grid-template-columns: 1fr; gap: 32px; }
-        .hero-photo-col { max-width: 300px; }
-        .artwork-grid { grid-template-columns: repeat(2,1fr); }
+    @media (max-width: 860px) {
+        .shell { grid-template-columns: 1fr; gap: 0; padding-top: 28px; }
+        .rail { position: static; max-height: none; overflow: visible; padding-bottom: 30px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+        .photo-card { max-width: 260px; }
+        .name { margin-top: 22px; }
+        .bio { max-width: 62ch; }
     }
-    @media (max-width: 520px) {
-        .news-year { grid-template-columns: 1fr; gap: 10px; }
-        .news-year h3 { position: static; }
-        .hero-title { font-size: 11px; letter-spacing: 0.03em; }
-        .hero-links { gap: 10px; }
-        .hero-links a { flex: 1 1 auto; justify-content: center; }
+    @media (max-width: 560px) {
+        .artwork-grid { grid-template-columns: repeat(2, 1fr); }
+        .news-year { grid-template-columns: 1fr; gap: 6px; }
     }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -206,326 +172,223 @@
 </head>
 <body>
 
-
-<!-- Navigation -->
-<nav>
-    <a href="#top" class="nav-brand">Tahseen Rabbani</a>
-    <ul class="nav-links">
-        <li><a href="#news"><em>01</em>News</a></li>
-        <li><a href="#papers"><em>02</em>Works</a></li>
-        <li><a href="#artwork"><em>03</em>Artwork</a></li>
-        <li><a href="docs/CV_Tahseen_Rabbani_Current.pdf"><em>04</em>CV</a></li>
-    </ul>
-    <button class="theme-toggle" aria-label="Toggle light/dark mode" onclick="toggleTheme()">
-        <span class="icon-sun">&#9788;</span><span class="icon-moon">&#9790;</span>
-    </button>
-    <button class="nav-toggle" aria-label="Toggle menu" onclick="this.closest('nav').classList.toggle('nav-open')">
-        <span></span><span></span><span></span>
-    </button>
-</nav>
-
-<!-- Hero -->
-<div class="hero" id="top">
-    <div class="hero-content">
-        <div class="hero-photo-col">
-            <div class="hero-photo-wrapper">
-                <span class="frame-mark tl"></span><span class="frame-mark tr"></span>
-                <span class="frame-mark bl"></span><span class="frame-mark br"></span>
-                <img src="img/sketch_original.png" alt="Tahseen Rabbani" class="hero-photo" id="hero-photo">
+<div class="shell" id="top">
+    <!-- LEFT RAIL -->
+    <aside class="rail">
+        <div class="photo-card">
+            <div class="photo">
+                <img src="img/sketch_original.png" alt="Tahseen Rabbani" id="hero-photo">
             </div>
-            <div class="sketch-buttons">
+            <div class="sketch-row">
                 <button class="sketch-btn active" onclick="showSketch('img/sketch_original.png', this)">original</button>
                 <button class="sketch-btn" onclick="showSketch('img/sketch_count.png', this)">count</button>
-                <button class="sketch-btn" onclick="showSketch('img/sketch_halftone.png', this)">halftone</button>
-                <button class="sketch-btn" onclick="showSketch('img/sketch_riso.png', this)">riso</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_dct.png', this)">dct</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_wavelet.png', this)">wavelet</button>
                 <button class="sketch-btn" onclick="showSketch('img/sketch_lowrank.png', this)">low-rank</button>
             </div>
-            <p class="sketch-caption">
-                &#47;&#47; my face, run through a few sketches &mdash; a randomized <b>count</b> sketch
-                (recovered pixel-wise), a <b>halftone</b> screen, a <b>riso</b> (tritone risograph) print,
-                and a <b>low-rank</b> (rank-12 SVD) projection. Sketching happens to be one of the things I study.
-            </p>
+            <p class="sketch-note">The photo compressed and recovered four ways — a count sketch, block DCT, a Haar wavelet, and a low-rank SVD. Sketching is one of the things I study.</p>
         </div>
-        <div class="hero-text">
-            <h1>Tahseen Rabbani</h1>
-            <p class="hero-title"><a href="https://www.computerscience.uchicago.edu/people/tahseen-rabbani/">Postdoctoral Scholar &middot; University of Chicago</a></p>
-            <p class="hero-bio">
-                I am an AI/ML postdoc co-hosted by
-                <a href="https://zhangce.github.io/">Ce Zhang</a> and
-                <a href="https://litian96.github.io/">Tian Li</a>.
-                My research focuses on efficiency, distributed learning, and privacy. I'm also interested in numerical methods, watermarking, and translation.
-                I received my Ph.D. in Computer Science from the University of Maryland, advised by <a href="https://furong-huang.com/">Furong Huang</a>.
-            </p>
-            <div class="hero-links">
-                <a href="https://github.com/rabbanitw">
-                    <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                    GitHub
-                </a>
-                <a href="https://www.linkedin.com/in/tahseen-rabbani-27501170/">
-                    <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                    LinkedIn
-                </a>
-                <a href="https://scholar.google.com/citations?user=ufpvVrQAAAAJ">
-                    <svg viewBox="0 0 24 24"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 100 14 7 7 0 000-14z"/></svg>
-                    Scholar
-                </a>
+
+        <h1 class="name">Tahseen Rabbani</h1>
+        <p class="role"><a href="https://www.computerscience.uchicago.edu/people/tahseen-rabbani/">Postdoctoral Scholar · University of Chicago</a></p>
+        <p class="bio">
+            AI/ML postdoc co-hosted by <a href="https://zhangce.github.io/">Ce Zhang</a> and
+            <a href="https://litian96.github.io/">Tian Li</a>. I work on efficiency, distributed learning,
+            and privacy — with side interests in numerical methods, watermarking, and translation.
+            Ph.D. in Computer Science from the University of Maryland, advised by
+            <a href="https://furong-huang.com/">Furong Huang</a>.
+        </p>
+
+        <nav class="rail-nav">
+            <a href="#news">News</a>
+            <a href="#papers">Works</a>
+            <a href="#artwork">Artwork</a>
+            <a href="docs/CV_Tahseen_Rabbani_Current.pdf">CV</a>
+        </nav>
+
+        <div class="rail-foot">
+            <div class="socials">
+                <a href="https://github.com/rabbanitw" aria-label="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+                <a href="https://scholar.google.com/citations?user=ufpvVrQAAAAJ" aria-label="Google Scholar"><svg viewBox="0 0 24 24"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 100 14 7 7 0 000-14z"/></svg></a>
+                <a href="https://www.linkedin.com/in/tahseen-rabbani-27501170/" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+                <a href="https://twitter.com/TahseenRab74917" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
             </div>
+            <button class="theme-toggle" aria-label="Toggle light/dark mode" onclick="toggleTheme()"><span class="icon-sun">&#9788;</span><span class="icon-moon">&#9790;</span></button>
         </div>
-    </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+        <section id="news" class="fade-in">
+            <h2 class="section-title">News</h2>
+
+            <div class="news-year"><h3>2026</h3><ul>
+                <li>Collaborated with <b>Scale AI</b> on <a href="https://labs.scale.com/papers/researchrubrics">ResearchRubrics</a> (<b>ICLR 2026</b>), <a href="https://labs.scale.com/papers/prbench">PRBench</a> (<b>ACL Main 2026</b>), and the <a href="https://www.remotelabor.ai/">Remote Labor Index</a>. Check them out!</li>
+            </ul></div>
+
+            <div class="news-year"><h3>2025</h3><ul>
+                <li>Selected as a <b>2025 Stanford Rising Star in Data Science</b>, a workshop co-organized by Stanford Data Science, Halıcıo&#287;lu Data Science Institute (UC San Diego), and the University of Chicago. Presented on the interplay between efficiency and privacy in distributed learning. See this year's cohort <a href="https://lnkd.in/epu8cmic">here</a>.</li>
+                <li>Sat on the <b>CFAgentic@ICML'25</b> panel with Niloofar Mireshghallah, William Lindskog-M&uuml;nzing, and Chi Wang to discuss: <em>"Will the future of AI agents be collaborative and federated?"</em></li>
+                <li>Presented "Mitigating Unintended Memorization with LoRA in Federated Learning for LLMs" (joint with EPFL) as an oral at both the <em>MemFM</em> and <em>CFAgentic</em> workshops @ ICML 2025.</li>
+                <li>July: After an exciting year at Yale working on applied ML, I am now at the <b>University of Chicago</b> as a Postdoctoral Scholar, co-hosted by <a href="https://litian96.github.io/">Tian Li</a> and <a href="https://zhangce.github.io/">Ce Zhang</a>.</li>
+                <li>January: Rotated to <a href="https://hcholab.org">Dr. Hoon Cho's lab</a> at Yale. Continuing work in low-resource, private, distributed ML for proteomics and drug discovery.</li>
+                <li>"HashEvict: A Pre-Attention KV Cache Eviction Strategy using LSH" is now on <a href="https://arxiv.org/abs/2412.16187">arXiv</a>. Pushing the Pareto frontier on speed and output quality for KV compression.</li>
+            </ul></div>
+
+            <div class="news-year"><h3>2024</h3><ul>
+                <li>"Llama-3-Meditron: An Open-Source Suite of Medical LLMs" accepted as an <b>oral</b> at the <b>AAAI'25 Workshop AI2ASE</b>.</li>
+                <li>Co-hosted our watermarking workshop at <b>NeurIPS'24</b>. Catch the event <a href="https://neurips.cc/virtual/2024/competition/84795">here</a>!</li>
+                <li>Presented distributed learning platform "DISCO" at <b>GDHF'24</b> in Nairobi, Kenya (joint with EPFL).</li>
+                <li>Two works accepted to the <b>NeurIPS'24 Workshop on ML and Compression</b>: "Shrinking the Size of Deep Extreme Multi-Label Classification" and "LSH-E Tells You What To Discard."</li>
+                <li>Competition proposal "Erasing the Invisible: A Stress-Test Challenge for Image Watermarks" accepted by <b>NeurIPS'24</b>.</li>
+                <li>"WAVES: Benchmarking the Robustness of Image Watermarks" accepted to <b>ICML'24</b>.</li>
+                <li>Headed to <a href="https://www.yale-light.org/">Yale LiGHT</a> for a postdoc on LLM compression and FL for healthcare analytics.</li>
+                <li>Selected as a <b>2024 RSA Security Scholar</b> for work in privacy-preserving ML.</li>
+            </ul></div>
+
+            <div class="news-year"><h3>2023</h3><ul>
+                <li>Paper accepted to <b>NeurIPS'23</b>: "Large-Scale Distributed Learning via Private On-Device Locality-Sensitive Hashing." Also presented at the ICLR 2023 Workshop on Sparsity in Neural Networks.</li>
+                <li>Presented at <b>SLowDNN'23</b> in Dubai: "A Framework for Representation and Fast Evaluation of Multilinear Operations in Convolutional TNNs."</li>
+            </ul></div>
+
+            <div class="news-year"><h3>2022</h3><ul>
+                <li>Paper accepted to <b>ICLR'23</b>: "SWIFT: Rapid Decentralized Federated Learning via Wait-Free Model Communication." Also received an abstract selection for the 2023 Qualcomm Innovation Fellowship and a <b>spotlight</b> at FL-NeurIPS'22.</li>
+                <li>Paper accepted to <b>NeurIPS'22</b>: "SketchGNN: Scalable Graph Neural Networks," plus two papers at GL Frontiers 2022.</li>
+                <li><b>Oral</b> presentation for "Comfetch: Federated Learning of Large Networks on Memory-Constrained Clients via Sketching" at FL-AAAI-22.</li>
+                <li>Paper accepted to <b>MSML'22</b>: "Practical and Fast Momentum-Based Power Methods."</li>
+            </ul></div>
+
+            <div class="news-year"><h3>2021</h3><ul>
+                <li>Nominated as a 2022 Apple Scholar in AI/ML by the University of Maryland, College Park.</li>
+                <li>Awarded an NSF COMBINE Fellowship for 2021&ndash;2022.</li>
+            </ul></div>
+        </section>
+
+        <section id="papers" class="fade-in">
+            <h2 class="section-title">Selected Works</h2>
+
+            <div class="pub"><span class="venue">TMLR 2026</span>
+                <h4><a href="https://arxiv.org/abs/2502.05087">Mitigating Unintended Memorization with LoRA in Federated Learning for LLMs</a></h4>
+                <p class="pub-authors">T. Bossy, J. Vignoud, <span class="me">T. Rabbani</span>, JRT Pastoriza, M. Jaggi.</p>
+                <p class="pub-desc">We show that LoRA reduces memorization in federated LLM training by up to 10x without major performance loss, across high-risk domains (medicine, law, finance) and model sizes from 1B to 70B. LoRA composes naturally with other privacy techniques like gradient clipping, secure aggregation, and Goldfish loss for further protection.</p>
+            </div>
+            <div class="pub"><span class="venue">NeurIPS 2025</span>
+                <h4><a href="https://neurips.cc/virtual/2025/loc/san-diego/poster/121791">A Technical Report on "Erasing the Invisible": The 2024 NeurIPS Competition on Stress Testing Image Watermarks</a></h4>
+                <p class="pub-authors">B. An*, C. Deng*, M. Ding*, <span class="me">T. Rabbani*</span> et al.</p>
+                <p class="pub-desc">Key findings of our 2024 NeurIPS competition. Spoiler: the winners were <em>really</em> good at removing watermarks! Bonus: we've released all submissions to help further research on robust watermark design.</p>
+            </div>
+            <div class="pub"><span class="venue">ICML 2024</span>
+                <h4><a href="https://arxiv.org/abs/2401.08573">Benchmarking the Robustness of Image Watermarks</a></h4>
+                <p class="pub-authors">B. An*, M. Ding*, <span class="me">T. Rabbani*</span> et al.</p>
+                <p class="pub-desc">We systematically reveal weaknesses in modern image-based watermarking protocols, including generative approaches. Check out the benchmark at <a href="https://wavesbench.github.io/">wavesbench.github.io</a>.</p>
+            </div>
+            <div class="pub"><span class="venue">NeurIPS 2023</span>
+                <h4><a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/34345e243156da67605d4b63d71c8d98-Paper-Conference.pdf">Large-Scale Distributed Learning via Private On-Device LSH</a></h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>, M. Bornstein*, F. Huang.</p>
+                <p class="pub-desc">Using a new family of hash functions, we develop one of the first private, personalized, and memory-efficient on-device LSH frameworks for training recommender DNNs on extreme multi-label datasets.</p>
+            </div>
+            <div class="pub"><span class="venue">ICLR 2023</span>
+                <h4><a href="https://arxiv.org/abs/2210.14026">SWIFT: Rapid Decentralized Federated Learning via Wait-Free Model Communication</a></h4>
+                <p class="pub-authors">M. Bornstein, <span class="me">T. Rabbani*</span>, AS Bedhi, F. Huang.</p>
+                <p class="pub-desc">We enable wait-free model training for peer-to-peer FL using model caching. Provable convergence at SotA rate; empirically significantly speeds up global model convergence.</p>
+            </div>
+            <div class="pub"><span class="venue">NeurIPS 2022</span>
+                <h4><a href="https://proceedings.neurips.cc/paper_files/paper/2022/file/1385753b9661cd2d9f2cb8958dec985b-Paper-Conference.pdf">Sketch-GNN: Scalable Graph Neural Networks with Sublinear Training Complexity</a></h4>
+                <p class="pub-authors">M. Ding, <span class="me">T. Rabbani</span>, B. An, EZ Wang, F. Huang.</p>
+                <p class="pub-desc">A sketch-based algorithm whose training time and memory grow sublinearly w.r.t. graph size by training GNNs atop compact sketches of graph adjacency and node embeddings.</p>
+            </div>
+            <div class="pub"><span class="venue">Algebra &amp; Number Theory 2023</span>
+                <h4><a href="https://arxiv.org/abs/2004.01214">Constructions of Difference Sets in Nonabelian 2-Groups</a></h4>
+                <p class="pub-authors">A. Applebaum, J. Clikeman, J. Davis, J. Dillon, J. Jedwab, T. Rabbani, K. Smith, W. Yolland.</p>
+                <p class="pub-desc">We determine that all groups of order 256 not excluded by the two classical nonexistence criteria contain a difference set, resolving a 25-year-old question posed by John Dillon.</p>
+            </div>
+            <div class="pub"><span class="venue">PMLR 2022</span>
+                <h4><a href="https://proceedings.mlr.press/v145/rabbani22a.html">Practical and Fast Momentum-Based Power Methods</a></h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>, A. Jain, A. Rajkumar, F. Huang.</p>
+                <p class="pub-desc">We provide novel momentum-based power methods, DMPower and DMStream. In contrast with prior art, these accelerated methods do not depend on spectral knowledge.</p>
+            </div>
+            <div class="pub"><span class="venue">IntelliSys 2022</span>
+                <h4><a href="https://link.springer.com/chapter/10.1007/978-3-030-55180-3_35">Fast GPU Convolution for CP-Decomposed Tensorial Neural Networks</a></h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>, A. Reustle*, F. Huang.</p>
+                <p class="pub-desc">A GPU algorithm for convolution with decomposed tensor products. Up to 4.85x faster execution than cuDNN for some tensors.</p>
+            </div>
+            <div class="pub"><span class="venue">FFA 2022</span>
+                <h4><a href="https://www.degruyter.com/document/doi/10.1515/9783110621730-011/html">Nonabelian Orthogonal Building Sets</a></h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>, K. Smith.</p>
+                <p class="pub-desc">We examine recent construction techniques of Hadamard difference sets in 2-groups and an extension of orthogonal building sets to nonabelian groups.</p>
+            </div>
+            <div class="pub"><span class="venue">Rose-Hulman UMJ 2016</span>
+                <h4><a href="https://www.rose-hulman.edu/mathjournal/archives/2016/vol17-n1/paper1/v17n1-1pd.pdf">Unique Minimal Forcing Sets and Forced Representation of Integers by Quadratic Forms</a></h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>.</p>
+                <p class="pub-desc">We use Bhargava's theory of escalators to establish infinite families of positive integers without unique minimal forcing sets.</p>
+            </div>
+            <div class="pub"><span class="venue">SIURO 2015</span>
+                <h4><a href="http://dx.doi.org/10.1137/14S013688">Improving the Error-Correcting Code Used in 3-G Communication</a></h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>.</p>
+                <p class="pub-desc">We give a construction of a [30,10,11] non-cyclic code that improves upon the [30,10,10] code described in Samsung's patent US 7706348.</p>
+            </div>
+        </section>
+
+        <!-- Workshop Papers (hidden) -->
+        <section id="workshop" class="fade-in" style="display:none">
+            <h2 class="section-title">Workshop Papers</h2>
+            <div class="pub"><span class="venue">MemFM @ ICML 2025</span>
+                <h4>Mitigating Unintended Memorization with LoRA in Federated Learning for LLMs</h4>
+                <p class="pub-authors">T. Bossy*, J. Vignoud*, T. Rabbani, M. Jaggi, JRT Pastoriza.</p></div>
+            <div class="pub"><span class="venue">SLowDNN 2023</span>
+                <h4>Fast Evaluation of Multilinear Operations in Convolutional Tensorial Neural Networks</h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>, J. Su*, X. Liu, D. Chan, G. Sangston, F. Huang.</p></div>
+            <div class="pub"><span class="venue">GLF @ NeurIPS 2023</span>
+                <h4>Faster Hyperparameter Search for GNNs via Calibrated Dataset Condensation</h4>
+                <p class="pub-authors">M. Ding*, Y. Xu, <span class="me">T. Rabbani</span>, X. Liu, T. Ranadive, TC Tuan, F. Huang.</p></div>
+            <div class="pub"><span class="venue">FL-AAAI 2022</span>
+                <h4>Comfetch: Federated Learning of Large Networks on Constrained Clients via Sketching</h4>
+                <p class="pub-authors"><span class="me">T. Rabbani*</span>, B. Feng*, M. Bornstein, K. Sang, Y. Yang, A. Rajkumar, A. Varshney, F. Huang.</p></div>
+        </section>
+
+        <section id="artwork" class="fade-in">
+            <h2 class="section-title">Artwork</h2>
+            <p class="artwork-intro">I enjoy creating photorealistic artwork in my free time.</p>
+            <div class="artwork-grid">
+                <div class="art" onclick="openLightbox(this)" data-title="Ian Curtis of Joy Division">
+                    <img src="img/portfolio/joy_division.png" alt="Ian Curtis of Joy Division" loading="lazy">
+                    <div class="art-cap"><span>Ian Curtis of Joy Division</span></div>
+                </div>
+                <div class="art" onclick="openLightbox(this)" data-title="James Dean">
+                    <img src="img/portfolio/james_dean.png" alt="James Dean" loading="lazy">
+                    <div class="art-cap"><span>James Dean</span></div>
+                </div>
+                <div class="art" onclick="openLightbox(this)" data-title="Bengal Tiger">
+                    <img src="img/portfolio/bengaltiger.png" alt="Bengal Tiger" loading="lazy">
+                    <div class="art-cap"><span>Bengal Tiger</span></div>
+                </div>
+                <div class="art" onclick="openLightbox(this)" data-title="Dr. Gregory House">
+                    <img src="img/portfolio/house.png" alt="Dr. Gregory House" loading="lazy">
+                    <div class="art-cap"><span>Dr. Gregory House</span></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="foot">&copy; Tahseen Rabbani 2026 · built with plain HTML &amp; CSS</footer>
+    </main>
 </div>
 
-<!-- News -->
-<section id="news" class="fade-in">
-    <p class="kicker">&sect; News</p>
-    <h2 class="section-title">News</h2>
-    <div style="margin-top:32px">
-
-    <div class="news-year">
-        <h3>2026</h3>
-        <ul>
-            <li>Collaborated with <b>Scale AI</b> on <a href="https://labs.scale.com/papers/researchrubrics">ResearchRubrics</a> (<b>ICLR 2026</b>), <a href="https://labs.scale.com/papers/prbench">PRBench</a> (<b>ACL Main 2026</b>), and the <a href="https://www.remotelabor.ai/">Remote Labor Index</a>. Check them out!</li>
-        </ul>
-    </div>
-
-    <div class="news-year">
-        <h3>2025</h3>
-        <ul>
-            <li>Selected as a <b>2025 Stanford Rising Star in Data Science</b>, a workshop co-organized by Stanford Data Science, Halıcıo&#287;lu Data Science Institute (UC San Diego), and the University of Chicago. Presented on the interplay between efficiency and privacy in distributed learning. See this year's cohort <a href="https://lnkd.in/epu8cmic">here</a>.</li>
-            <li>Sat on the <b>CFAgentic@ICML'25</b> panel with Niloofar Mireshghallah, William Lindskog-M&uuml;nzing, and Chi Wang to discuss: <em>"Will the future of AI agents be collaborative and federated?"</em></li>
-            <li>Presented "Mitigating Unintended Memorization with LoRA in Federated Learning for LLMs" (joint with EPFL) as an oral at both the <em>MemFM</em> and <em>CFAgentic</em> workshops @ ICML 2025.</li>
-            <li>July: After an exciting year at Yale working on applied ML, I am now at the <b>University of Chicago</b> as a Postdoctoral Scholar, co-hosted by <a href="https://litian96.github.io/">Tian Li</a> and <a href="https://zhangce.github.io/">Ce Zhang</a>.</li>
-            <li>January: Rotated to <a href="https://hcholab.org">Dr. Hoon Cho's lab</a> at Yale. Continuing work in low-resource, private, distributed ML for proteomics and drug discovery.</li>
-            <li>"HashEvict: A Pre-Attention KV Cache Eviction Strategy using LSH" is now on <a href="https://arxiv.org/abs/2412.16187">arXiv</a>. Pushing the Pareto frontier on speed and output quality for KV compression.</li>
-        </ul>
-    </div>
-
-    <div class="news-year">
-        <h3>2024</h3>
-        <ul>
-            <li>"Llama-3-Meditron: An Open-Source Suite of Medical LLMs" accepted as an <b>oral</b> at the <b>AAAI'25 Workshop AI2ASE</b>.</li>
-            <li>Co-hosted our watermarking workshop at <b>NeurIPS'24</b>. Catch the event <a href="https://neurips.cc/virtual/2024/competition/84795">here</a>!</li>
-            <li>Presented distributed learning platform "DISCO" at <b>GDHF'24</b> in Nairobi, Kenya (joint with EPFL).</li>
-            <li>Two works accepted to the <b>NeurIPS'24 Workshop on ML and Compression</b>: "Shrinking the Size of Deep Extreme Multi-Label Classification" and "LSH-E Tells You What To Discard."</li>
-            <li>Competition proposal "Erasing the Invisible: A Stress-Test Challenge for Image Watermarks" accepted by <b>NeurIPS'24</b>.</li>
-            <li>"WAVES: Benchmarking the Robustness of Image Watermarks" accepted to <b>ICML'24</b>.</li>
-            <li>Headed to <a href="https://www.yale-light.org/">Yale LiGHT</a> for a postdoc on LLM compression and FL for healthcare analytics.</li>
-            <li>Selected as a <b>2024 RSA Security Scholar</b> for work in privacy-preserving ML.</li>
-        </ul>
-    </div>
-
-    <div class="news-year">
-        <h3>2023</h3>
-        <ul>
-            <li>Paper accepted to <b>NeurIPS'23</b>: "Large-Scale Distributed Learning via Private On-Device Locality-Sensitive Hashing." Also presented at the ICLR 2023 Workshop on Sparsity in Neural Networks.</li>
-            <li>Presented at <b>SLowDNN'23</b> in Dubai: "A Framework for Representation and Fast Evaluation of Multilinear Operations in Convolutional TNNs."</li>
-        </ul>
-    </div>
-
-    <div class="news-year">
-        <h3>2022</h3>
-        <ul>
-            <li>Paper accepted to <b>ICLR'23</b>: "SWIFT: Rapid Decentralized Federated Learning via Wait-Free Model Communication." Also received an abstract selection for the 2023 Qualcomm Innovation Fellowship and a <b>spotlight</b> at FL-NeurIPS'22.</li>
-            <li>Paper accepted to <b>NeurIPS'22</b>: "SketchGNN: Scalable Graph Neural Networks," plus two papers at GL Frontiers 2022.</li>
-            <li><b>Oral</b> presentation for "Comfetch: Federated Learning of Large Networks on Memory-Constrained Clients via Sketching" at FL-AAAI-22.</li>
-            <li>Paper accepted to <b>MSML'22</b>: "Practical and Fast Momentum-Based Power Methods."</li>
-        </ul>
-    </div>
-
-    <div class="news-year">
-        <h3>2021</h3>
-        <ul>
-            <li>Nominated as a 2022 Apple Scholar in AI/ML by the University of Maryland, College Park.</li>
-            <li>Awarded an NSF COMBINE Fellowship for 2021&ndash;2022.</li>
-        </ul>
-    </div>
-    </div>
-</section>
-
-<!-- Selected Works -->
-<section id="papers" class="fade-in">
-    <p class="kicker">&sect; Selected Works</p>
-    <h2 class="section-title">Selected Works</h2>
-    <div class="pub-list" style="margin-top:28px">
-
-        <div class="pub-card">
-            <span class="pub-venue">TMLR 2026</span>
-            <h4><a href="https://arxiv.org/abs/2502.05087">Mitigating Unintended Memorization with LoRA in Federated Learning for LLMs</a></h4>
-            <p class="pub-authors">T. Bossy, J. Vignoud, <span class="me">T. Rabbani</span>, JRT Pastoriza, M. Jaggi.</p>
-            <p class="pub-desc">We show that LoRA reduces memorization in federated LLM training by up to 10x without major performance loss, across high-risk domains (medicine, law, finance) and model sizes from 1B to 70B. LoRA composes naturally with other privacy techniques like gradient clipping, secure aggregation, and Goldfish loss for further protection.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">NeurIPS 2025</span>
-            <h4><a href="https://neurips.cc/virtual/2025/loc/san-diego/poster/121791">A Technical Report on "Erasing the Invisible": The 2024 NeurIPS Competition on Stress Testing Image Watermarks</a></h4>
-            <p class="pub-authors">B. An*, C. Deng*, M. Ding*, <span class="me">T. Rabbani*</span> et al.</p>
-            <p class="pub-desc">Key findings of our 2024 NeurIPS competition. Spoiler: the winners were <em>really</em> good at removing watermarks! Bonus: we've released all submissions to help further research on robust watermark design.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">ICML 2024</span>
-            <h4><a href="https://arxiv.org/abs/2401.08573">Benchmarking the Robustness of Image Watermarks</a></h4>
-            <p class="pub-authors">B. An*, M. Ding*, <span class="me">T. Rabbani*</span> et al.</p>
-            <p class="pub-desc">We systematically reveal weaknesses in modern image-based watermarking protocols, including generative approaches. Check out the benchmark at <a href="https://wavesbench.github.io/">wavesbench.github.io</a>.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">NeurIPS 2023</span>
-            <h4><a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/34345e243156da67605d4b63d71c8d98-Paper-Conference.pdf">Large-Scale Distributed Learning via Private On-Device LSH</a></h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>, M. Bornstein*, F. Huang.</p>
-            <p class="pub-desc">Using a new family of hash functions, we develop one of the first private, personalized, and memory-efficient on-device LSH frameworks for training recommender DNNs on extreme multi-label datasets.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">ICLR 2023</span>
-            <h4><a href="https://arxiv.org/abs/2210.14026">SWIFT: Rapid Decentralized Federated Learning via Wait-Free Model Communication</a></h4>
-            <p class="pub-authors">M. Bornstein, <span class="me">T. Rabbani*</span>, AS Bedhi, F. Huang.</p>
-            <p class="pub-desc">We enable wait-free model training for peer-to-peer FL using model caching. Provable convergence at SotA rate; empirically significantly speeds up global model convergence.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">NeurIPS 2022</span>
-            <h4><a href="https://proceedings.neurips.cc/paper_files/paper/2022/file/1385753b9661cd2d9f2cb8958dec985b-Paper-Conference.pdf">Sketch-GNN: Scalable Graph Neural Networks with Sublinear Training Complexity</a></h4>
-            <p class="pub-authors">M. Ding, <span class="me">T. Rabbani</span>, B. An, EZ Wang, F. Huang.</p>
-            <p class="pub-desc">A sketch-based algorithm whose training time and memory grow sublinearly w.r.t. graph size by training GNNs atop compact sketches of graph adjacency and node embeddings.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">Algebra &amp; Number Theory 2023</span>
-            <h4><a href="https://arxiv.org/abs/2004.01214">Constructions of Difference Sets in Nonabelian 2-Groups</a></h4>
-            <p class="pub-authors">A. Applebaum, J. Clikeman, J. Davis, J. Dillon, J. Jedwab, T. Rabbani, K. Smith, W. Yolland.</p>
-            <p class="pub-desc">We determine that all groups of order 256 not excluded by the two classical nonexistence criteria contain a difference set, resolving a 25-year-old question posed by John Dillon.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">PMLR 2022</span>
-            <h4><a href="https://proceedings.mlr.press/v145/rabbani22a.html">Practical and Fast Momentum-Based Power Methods</a></h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>, A. Jain, A. Rajkumar, F. Huang.</p>
-            <p class="pub-desc">We provide novel momentum-based power methods, DMPower and DMStream. In contrast with prior art, these accelerated methods do not depend on spectral knowledge.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">IntelliSys 2022</span>
-            <h4><a href="https://link.springer.com/chapter/10.1007/978-3-030-55180-3_35">Fast GPU Convolution for CP-Decomposed Tensorial Neural Networks</a></h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>, A. Reustle*, F. Huang.</p>
-            <p class="pub-desc">A GPU algorithm for convolution with decomposed tensor products. Up to 4.85x faster execution than cuDNN for some tensors.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">FFA 2022</span>
-            <h4><a href="https://www.degruyter.com/document/doi/10.1515/9783110621730-011/html">Nonabelian Orthogonal Building Sets</a></h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>, K. Smith.</p>
-            <p class="pub-desc">We examine recent construction techniques of Hadamard difference sets in 2-groups and an extension of orthogonal building sets to nonabelian groups.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">Rose-Hulman UMJ 2016</span>
-            <h4><a href="https://www.rose-hulman.edu/mathjournal/archives/2016/vol17-n1/paper1/v17n1-1pd.pdf">Unique Minimal Forcing Sets and Forced Representation of Integers by Quadratic Forms</a></h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>.</p>
-            <p class="pub-desc">We use Bhargava's theory of escalators to establish infinite families of positive integers without unique minimal forcing sets.</p>
-        </div>
-
-        <div class="pub-card">
-            <span class="pub-venue">SIURO 2015</span>
-            <h4><a href="http://dx.doi.org/10.1137/14S013688">Improving the Error-Correcting Code Used in 3-G Communication</a></h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>.</p>
-            <p class="pub-desc">We give a construction of a [30,10,11] non-cyclic code that improves upon the [30,10,10] code described in Samsung's patent US 7706348.</p>
-        </div>
-
-    </div>
-</section>
-
-<!-- Workshop Papers (hidden) -->
-<section id="workshop" class="fade-in" style="display:none">
-    <h2 class="section-title">Workshop Papers</h2>
-    <div class="pub-list">
-        <div class="pub-card">
-            <span class="pub-venue">MemFM @ ICML 2025</span>
-            <h4>Mitigating Unintended Memorization with LoRA in Federated Learning for LLMs</h4>
-            <p class="pub-authors">T. Bossy*, J. Vignoud*, T. Rabbani, M. Jaggi, JRT Pastoriza.</p>
-        </div>
-        <div class="pub-card">
-            <span class="pub-venue">SLowDNN 2023</span>
-            <h4>Fast Evaluation of Multilinear Operations in Convolutional Tensorial Neural Networks</h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>, J. Su*, X. Liu, D. Chan, G. Sangston, F. Huang.</p>
-        </div>
-        <div class="pub-card">
-            <span class="pub-venue">GLF @ NeurIPS 2023</span>
-            <h4>Faster Hyperparameter Search for GNNs via Calibrated Dataset Condensation</h4>
-            <p class="pub-authors">M. Ding*, Y. Xu, <span class="me">T. Rabbani</span>, X. Liu, T. Ranadive, TC Tuan, F. Huang.</p>
-        </div>
-        <div class="pub-card">
-            <span class="pub-venue">FL-AAAI 2022</span>
-            <h4>Comfetch: Federated Learning of Large Networks on Constrained Clients via Sketching</h4>
-            <p class="pub-authors"><span class="me">T. Rabbani*</span>, B. Feng*, M. Bornstein, K. Sang, Y. Yang, A. Rajkumar, A. Varshney, F. Huang.</p>
-        </div>
-    </div>
-</section>
-
-<!-- Artwork -->
-<section id="artwork" class="fade-in">
-    <p class="kicker">&sect; Artwork</p>
-    <h2 class="section-title">Artwork</h2>
-    <p class="artwork-intro">I enjoy creating photorealistic artwork in my free time.</p>
-    <div class="artwork-grid">
-        <div class="artwork-item" onclick="openLightbox(this)" data-title="Ian Curtis of Joy Division">
-            <img src="img/portfolio/joy_division.png" alt="Ian Curtis of Joy Division" loading="lazy">
-            <div class="artwork-overlay"><span>Ian Curtis of Joy Division</span></div>
-        </div>
-        <div class="artwork-item" onclick="openLightbox(this)" data-title="James Dean">
-            <img src="img/portfolio/james_dean.png" alt="James Dean" loading="lazy">
-            <div class="artwork-overlay"><span>James Dean</span></div>
-        </div>
-        <div class="artwork-item" onclick="openLightbox(this)" data-title="Bengal Tiger">
-            <img src="img/portfolio/bengaltiger.png" alt="Bengal Tiger" loading="lazy">
-            <div class="artwork-overlay"><span>Bengal Tiger</span></div>
-        </div>
-        <div class="artwork-item" onclick="openLightbox(this)" data-title="Dr. Gregory House">
-            <img src="img/portfolio/house.png" alt="Dr. Gregory House" loading="lazy">
-            <div class="artwork-overlay"><span>Dr. Gregory House</span></div>
-        </div>
-    </div>
-</section>
-
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <button class="lightbox-close" aria-label="Close">&times;</button>
     <img src="" alt="" id="lightbox-img">
-    <div class="lightbox-caption" id="lightbox-caption"></div>
+    <div class="lightbox-cap" id="lightbox-cap"></div>
 </div>
 
-<!-- Footer -->
-<footer>
-    <div class="footer-copy">&copy; Tahseen Rabbani 2026</div>
-    <div class="footer-social">
-        <a href="https://twitter.com/TahseenRab74917" aria-label="Twitter">
-            <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
-        <a href="https://www.linkedin.com/in/tahseen-rabbani-27501170/" aria-label="LinkedIn">
-            <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        </a>
-        <a href="https://github.com/rabbanitw" aria-label="GitHub">
-            <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        </a>
-    </div>
-</footer>
-
 <script>
-// Scroll fade-in
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.06 });
+}, { threshold: 0.05 });
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// Sticky-nav hairline
-const navEl = document.querySelector('nav');
-addEventListener('scroll', () => navEl.classList.toggle('scrolled', scrollY > 16), { passive: true });
-
-// Lightbox
 function openLightbox(el) {
-    const lb = document.getElementById('lightbox');
     document.getElementById('lightbox-img').src = el.querySelector('img').src;
-    document.getElementById('lightbox-caption').textContent = el.dataset.title;
-    lb.classList.add('active');
+    document.getElementById('lightbox-cap').textContent = el.dataset.title;
+    document.getElementById('lightbox').classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 function closeLightbox() {
@@ -534,7 +397,6 @@ function closeLightbox() {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-// Theme toggle
 function toggleTheme() {
     const html = document.documentElement;
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
@@ -546,7 +408,6 @@ function toggleTheme() {
     if (saved) document.documentElement.setAttribute('data-theme', saved);
 })();
 
-// Sketch demo — swap precomputed pixel-wise sketches
 function showSketch(src, btn) {
     document.querySelectorAll('.sketch-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');

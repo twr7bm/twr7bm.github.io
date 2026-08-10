@@ -2,33 +2,34 @@
 """
 Generate the sketch portraits used on the hero photo toggle.
 
-Four deliberately *distinct* looks (Count/Gaussian random sketches are the same
-operation and look identical, so only Count is kept as the algorithmic nod):
+Every option is a genuine *project-onto-a-subspace-then-recover* map — the same
+idea (compress by keeping few coefficients, then reconstruct) in four different
+bases, so the toggle reads as an honest little tour of linear sketching:
 
-  count     : randomized count-sketch, reconstructed PIXEL-WISE (whole image
-              flattened per channel, not row-by-row). Each pixel hashes to one of
-              m buckets with a +/-1 sign; recover per pixel; median-of-k kills the
-              heavy-tailed collision noise. Keeps color -> speckled grain.
-  halftone  : classic newsprint dot screen (dot area proportional to darkness),
-              tinted to the site's paper/ink palette.
-  riso      : tritone "risograph" screen-print in the site rust palette.
-  lowrank   : rank-r truncated SVD per channel -> smooth "compressed" ghost.
+  count    : randomized count-sketch. y = Sx via hashing (each pixel -> one of m
+             buckets with a +/-1 sign); recover x_hat = s * y[h]; median-of-k
+             kills the heavy-tailed collision noise. Reconstructed PIXEL-WISE
+             (whole image flattened per channel). -> colored speckle grain.
+  dct      : block DCT coding. Each 8x8 block is projected onto its top keep*keep
+             low-frequency cosine coefficients, then inverse-DCT'd. -> JPEG-style
+             blockiness.
+  wavelet  : Haar wavelet transform, keep the largest `keep_frac` coefficients by
+             magnitude (a sparse projection), then invert. -> multi-scale mosaic.
+  lowrank  : truncated SVD per channel — project onto the top-r singular subspace
+             and reconstruct. -> smooth "compressed" ghost.
 
 Deterministic. Requires numpy + pillow.
 
     python3 generate_sketches.py
 """
 import numpy as np
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image
 
-SRC   = "img/sketch_original.png"
-PAPER = np.array([244, 243, 238], np.float32)   # --paper
-INK   = np.array([ 23,  24,  28], np.float32)   # --ink
-RUST  = np.array([194,  65,  12], np.float32)   # --rust
-EMBER = np.array([255, 138,  61], np.float32)   # --ember
+SRC = "img/sketch_original.png"
 
-C_M, C_K, C_SEED = 22000, 9, 7919               # count sketch
 
+# ---------------- count sketch (random hashing) ----------------
+C_M, C_K, C_SEED = 22000, 9, 7919
 
 def count_sketch(chan, m=C_M, k=C_K, seed=C_SEED):
     N = chan.shape[0]
@@ -41,7 +42,6 @@ def count_sketch(chan, m=C_M, k=C_K, seed=C_SEED):
         rec[t] = s * y[h]
     return np.median(rec, axis=0)
 
-
 def make_count(rgb):
     H, W, _ = rgb.shape
     out = np.empty_like(rgb)
@@ -50,62 +50,87 @@ def make_count(rgb):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def tint(gray):                                  # L in [0,255] -> paper..ink
-    t = (gray.astype(np.float32) / 255.0)[..., None]
-    return np.clip(INK + (PAPER - INK) * t, 0, 255).astype(np.uint8)
+# ---------------- block DCT coding ----------------
+def _dct_mat(n=8):
+    k = np.arange(n)[:, None]; m = np.arange(n)[None, :]
+    D = np.cos(np.pi * (2 * m + 1) * k / (2 * n)) * np.sqrt(2.0 / n)
+    D[0] *= 1 / np.sqrt(2)
+    return D
+
+def _dct_channel(ch, keep, n=8):
+    D = _dct_mat(n)
+    Hp = -(-ch.shape[0] // n) * n; Wp = -(-ch.shape[1] // n) * n
+    p = np.zeros((Hp, Wp)); p[:ch.shape[0], :ch.shape[1]] = ch
+    out = np.zeros_like(p)
+    with np.errstate(all="ignore"):
+        for y in range(0, Hp, n):
+            for x in range(0, Wp, n):
+                C = D @ p[y:y+n, x:x+n] @ D.T
+                M = np.zeros_like(C); M[:keep, :keep] = C[:keep, :keep]   # projection
+                out[y:y+n, x:x+n] = D.T @ M @ D
+    return out[:ch.shape[0], :ch.shape[1]]
+
+def make_dct(rgb, keep=2):
+    return np.clip(np.stack([_dct_channel(rgb[..., c], keep) for c in range(3)], -1), 0, 255).astype(np.uint8)
 
 
-def make_halftone(src, cell=5, ss=4):
-    # gentle contrast stretch so the portrait reads as dot density
-    g = np.asarray(ImageOps.autocontrast(src.convert("L"), cutoff=2), np.float32)
-    H, W = g.shape
-    big = Image.new("L", (W * ss, H * ss), 255)
-    d = ImageDraw.Draw(big)
-    for y in range(0, H, cell):
-        for x in range(0, W, cell):
-            dark = 1 - g[y:y + cell, x:x + cell].mean() / 255
-            r = (cell * ss / 2) * np.sqrt(max(dark, 0.0))   # max dot just fills the cell
-            cx, cy = (x + cell / 2) * ss, (y + cell / 2) * ss
-            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=0)
-    small = np.asarray(big.resize((W, H), Image.LANCZOS))
-    return tint(small)
+# ---------------- Haar wavelet coding ----------------
+_R2 = np.sqrt(2.0)
+
+def _haar2d(a, L):
+    cur = a.copy(); h, w = a.shape
+    for l in range(L):
+        ch, cw = h >> l, w >> l; b = cur[:ch, :cw]
+        e = (b[:, 0::2] + b[:, 1::2]) / _R2; o = (b[:, 0::2] - b[:, 1::2]) / _R2; b = np.concatenate([e, o], 1)
+        e = (b[0::2, :] + b[1::2, :]) / _R2; o = (b[0::2, :] - b[1::2, :]) / _R2; b = np.concatenate([e, o], 0)
+        cur[:ch, :cw] = b
+    return cur
+
+def _ihaar2d(c, L):
+    cur = c.copy(); h, w = c.shape
+    for l in reversed(range(L)):
+        ch, cw = h >> l, w >> l; b = cur[:ch, :cw]
+        top = b[:ch // 2, :]; bot = b[ch // 2:, :]
+        col = np.empty_like(b); col[0::2, :] = (top + bot) / _R2; col[1::2, :] = (top - bot) / _R2
+        le = col[:, :cw // 2]; ro = col[:, cw // 2:]
+        row = np.empty_like(b); row[:, 0::2] = (le + ro) / _R2; row[:, 1::2] = (le - ro) / _R2
+        cur[:ch, :cw] = row
+    return cur
+
+def _wave_channel(ch, keep_frac, L=6, N=256):
+    p = np.zeros((N, N)); p[:ch.shape[0], :ch.shape[1]] = ch
+    C = _haar2d(p, L); flat = np.abs(C).ravel()
+    k = max(1, int(keep_frac * flat.size))
+    thr = np.partition(flat, -k)[-k]
+    C[np.abs(C) < thr] = 0
+    return _ihaar2d(C, L)[:ch.shape[0], :ch.shape[1]]
+
+def make_wavelet(rgb, keep_frac=0.025):
+    return np.clip(np.stack([_wave_channel(rgb[..., c], keep_frac) for c in range(3)], -1), 0, 255).astype(np.uint8)
 
 
+# ---------------- truncated SVD ----------------
 def make_lowrank(rgb, r=12):
-    # keep only the top-r singular values per channel -> smooth, "compressed" ghost
     out = np.empty_like(rgb)
-    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+    with np.errstate(all="ignore"):
         for c in range(3):
             U, S, Vt = np.linalg.svd(rgb[..., c].astype(np.float64), full_matrices=False)
             out[..., c] = (U[:, :r] * S[:r]) @ Vt[:r]
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def make_riso(src):
-    # tritone "risograph" screen-print in the site palette:
-    # ink shadows -> rust mids -> ember -> paper highlights
-    g = np.asarray(ImageOps.autocontrast(src.convert("L"), cutoff=1), np.float32) / 255.0
-    pos = np.array([0.0, 0.5, 0.8, 1.0])
-    stops = np.array([INK, RUST, EMBER, PAPER], np.float32)
-    out = np.empty(g.shape + (3,), np.float32)
-    for c in range(3):
-        out[..., c] = np.interp(g, pos, stops[:, c])
-    return np.clip(out, 0, 255).astype(np.uint8)
-
-
 def main():
     src = Image.open(SRC).convert("RGB")
-    rgb = np.asarray(src, np.float32)
+    rgb = np.asarray(src, np.float64)
     print(f"source {SRC}  {src.size[0]}x{src.size[1]}")
-
-    Image.fromarray(make_count(rgb)).save("img/sketch_count.png")
-    print("  count    -> img/sketch_count.png")
-    Image.fromarray(make_halftone(src)).save("img/sketch_halftone.png")
-    print("  halftone -> img/sketch_halftone.png")
-    Image.fromarray(make_riso(src)).save("img/sketch_riso.png")
-    print("  riso     -> img/sketch_riso.png")
-    Image.fromarray(make_lowrank(rgb)).save("img/sketch_lowrank.png")
-    print("  lowrank  -> img/sketch_lowrank.png")
+    for name, arr in [
+        ("count",   make_count(rgb)),
+        ("dct",     make_dct(rgb)),
+        ("wavelet", make_wavelet(rgb)),
+        ("lowrank", make_lowrank(rgb)),
+    ]:
+        Image.fromarray(arr).save(f"img/sketch_{name}.png")
+        print(f"  {name:8s} -> img/sketch_{name}.png")
 
 
 if __name__ == "__main__":
