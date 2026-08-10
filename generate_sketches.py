@@ -1,95 +1,93 @@
 #!/usr/bin/env python3
 """
-Regenerate the Count and Gaussian sketch portraits — PIXEL-WISE.
+Generate the sketch portraits used on the hero photo toggle.
 
-The previous version sketched each image *row* as an independent 1-D vector
-(m=80 out of 220), which produced strong horizontal banding. This version
-treats the whole image as one flattened pixel vector per color channel, so the
-reconstruction error is spread as uniform grain instead of streaks.
+Three deliberately *distinct* looks (Count/Gaussian random sketches are the same
+operation and look identical, so only Count is kept as the algorithmic nod):
 
-  Gaussian sketch  : y = S x,  x_hat = S^T y,  averaged over k copies.
-                     S has i.i.d. +/-1 entries (Achlioptas' database-friendly
-                     random projection — a sub-Gaussian JL sketch that is
-                     visually identical to a true Gaussian one but ~40x faster
-                     to sample). Recovery is unbiased since E[S^T S] = m*I.
-  Count sketch     : each pixel hashes to one of m buckets with a +/-1 sign;
-                     recover per pixel, take the MEDIAN over k copies to kill
-                     the heavy-tailed collision noise.
+  count     : randomized count-sketch, reconstructed PIXEL-WISE (whole image
+              flattened per channel, not row-by-row). Each pixel hashes to one of
+              m buckets with a +/-1 sign; recover per pixel; median-of-k kills the
+              heavy-tailed collision noise. Keeps color -> speckled grain.
+  halftone  : classic newsprint dot screen (dot area proportional to darkness),
+              tinted to the site's paper/ink palette.
+  pencil    : color-dodge pencil-sketch (grayscale / blurred-inverse), tinted.
 
-Deterministic: fixed seeds, so results are reproducible on every run.
+Deterministic. Requires numpy + pillow.
 
     python3 generate_sketches.py
 """
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter, ImageDraw, ImageOps
 
-SRC        = "img/sketch_original.png"
-OUT_COUNT  = "img/sketch_count.png"
-OUT_GAUSS  = "img/sketch_gaussian.png"
+SRC   = "img/sketch_original.png"
+PAPER = np.array([244, 243, 238], np.float32)   # --paper
+INK   = np.array([ 23,  24,  28], np.float32)    # --ink
 
-# --- Gaussian (Rademacher JL projection) ---
-G_M   = 6000     # sketch dimension per copy
-G_K   = 24       # copies to average  (total measurements m*k ~ 3x pixels)
-G_SEED = 20260210
-
-# --- Count sketch ---
-C_M   = 22000    # buckets (~N/2)
-C_K   = 9        # copies for the per-pixel median (odd)
-C_SEED = 7919
+C_M, C_K, C_SEED = 22000, 9, 7919               # count sketch
 
 
-def load(path):
-    im = Image.open(path).convert("RGB")
-    return np.asarray(im, dtype=np.float32), im.size  # (H,W,3)
-
-
-def gaussian_sketch(chan, m, k, seed):
-    """chan: 1-D float32 vector (all pixels of one channel)."""
+def count_sketch(chan, m=C_M, k=C_K, seed=C_SEED):
     N = chan.shape[0]
-    acc = np.zeros(N, dtype=np.float64)
+    rec = np.empty((k, N), np.float32)
     for t in range(k):
         rng = np.random.default_rng(seed + t * 104729)
-        nbytes = (m * N + 7) // 8
-        bits = np.unpackbits(rng.integers(0, 256, nbytes, dtype=np.uint8))[:m * N]
-        S = bits.astype(np.float32).reshape(m, N)
-        S *= 2.0; S -= 1.0                 # {0,1} -> {-1,+1}
-        y = S @ chan                       # sketch  (m,)
-        acc += S.T @ y                     # recover (N,)  ~ m * chan + noise
-        del S
-    return acc / (k * m)                   # unbiased mean-of-k estimate
+        h = rng.integers(0, m, N)
+        s = rng.integers(0, 2, N).astype(np.float32) * 2 - 1
+        y = np.bincount(h, weights=s * chan, minlength=m)
+        rec[t] = s * y[h]
+    return np.median(rec, axis=0)
 
 
-def count_sketch(chan, m, k, seed):
-    N = chan.shape[0]
-    recovered = np.empty((k, N), dtype=np.float32)
-    for t in range(k):
-        rng = np.random.default_rng(seed + t * 104729)
-        h = rng.integers(0, m, N)                      # bucket per pixel
-        s = (rng.integers(0, 2, N).astype(np.float32) * 2 - 1)  # +/-1 sign
-        y = np.bincount(h, weights=s * chan, minlength=m)       # sketch
-        recovered[t] = s * y[h]                                 # per-pixel recover
-    return np.median(recovered, axis=0)                # median-of-k
-
-
-def run(fn, arr, *params):
-    H, W, _ = arr.shape
-    out = np.empty_like(arr)
+def make_count(rgb):
+    H, W, _ = rgb.shape
+    out = np.empty_like(rgb)
     for c in range(3):
-        out[..., c] = fn(arr[..., c].reshape(-1), *params).reshape(H, W)
+        out[..., c] = count_sketch(rgb[..., c].reshape(-1)).reshape(H, W)
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+def tint(gray):                                  # L in [0,255] -> paper..ink
+    t = (gray.astype(np.float32) / 255.0)[..., None]
+    return np.clip(INK + (PAPER - INK) * t, 0, 255).astype(np.uint8)
+
+
+def make_halftone(src, cell=5, ss=4):
+    # gentle contrast stretch so the portrait reads as dot density
+    g = np.asarray(ImageOps.autocontrast(src.convert("L"), cutoff=2), np.float32)
+    H, W = g.shape
+    big = Image.new("L", (W * ss, H * ss), 255)
+    d = ImageDraw.Draw(big)
+    for y in range(0, H, cell):
+        for x in range(0, W, cell):
+            dark = 1 - g[y:y + cell, x:x + cell].mean() / 255
+            r = (cell * ss / 2) * np.sqrt(max(dark, 0.0))   # max dot just fills the cell
+            cx, cy = (x + cell / 2) * ss, (y + cell / 2) * ss
+            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=0)
+    small = np.asarray(big.resize((W, H), Image.LANCZOS))
+    return tint(small)
+
+
+def make_pencil(src, sigma=6):
+    g = src.convert("L")
+    inv = ImageOps.invert(g).filter(ImageFilter.GaussianBlur(sigma))
+    gn = np.asarray(g, np.float32)
+    bn = np.asarray(inv, np.float32)
+    pencil = np.where(bn >= 255, 255.0, np.minimum(255.0, gn * 255.0 / (255.0 - bn + 1e-3)))
+    return tint(pencil)
+
+
 def main():
-    arr, size = load(SRC)
-    print(f"source {SRC}  {size[0]}x{size[1]}  N={arr.shape[0]*arr.shape[1]} pixels/channel")
+    src = Image.open(SRC).convert("RGB")
+    rgb = np.asarray(src, np.float32)
+    print(f"source {SRC}  {src.size[0]}x{src.size[1]}")
 
-    print("count sketch  (pixel-wise, median-of-%d, m=%d) ..." % (C_K, C_M))
-    Image.fromarray(run(count_sketch, arr, C_M, C_K, C_SEED)).save(OUT_COUNT)
-
-    print("gaussian sketch (pixel-wise, mean-of-%d, m=%d) ..." % (G_K, G_M))
-    Image.fromarray(run(gaussian_sketch, arr, G_M, G_K, G_SEED)).save(OUT_GAUSS)
-
-    print("wrote", OUT_COUNT, "and", OUT_GAUSS)
+    Image.fromarray(make_count(rgb)).save("img/sketch_count.png")
+    print("  count    -> img/sketch_count.png")
+    Image.fromarray(make_halftone(src)).save("img/sketch_halftone.png")
+    print("  halftone -> img/sketch_halftone.png")
+    Image.fromarray(make_pencil(src)).save("img/sketch_pencil.png")
+    print("  pencil   -> img/sketch_pencil.png")
 
 
 if __name__ == "__main__":

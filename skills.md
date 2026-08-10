@@ -94,3 +94,12 @@
 - Headless Chrome clamps its **layout viewport to a 500px minimum**, so
   `--window-size=390` screenshots show a 500px layout cropped into 390px (looks
   like overflow but isn't). Measure `scrollWidth==clientWidth` to be sure.
+
+### Session: 2026-08-10 (follow-up)
+- Removed the top marquee ticker and the ◱ nav logo glyph; tightened the
+  hero→News gap (hero bottom padding + a smaller `#news` top padding).
+- **Sketch lineup made distinct/fun** — Count and Gaussian are the same operation
+  and looked identical, so replaced with three visually different looks:
+  `count` (colored grain), `halftone` (newsprint dot screen), `pencil`
+  (color-dodge sketch — also nods to the Artwork section). Halftone/pencil are
+  tinted to the paper/ink palette. See generate_sketches.py.

@@ -58,26 +58,16 @@
     h1,h2,h3,h4 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; line-height: 1.05; }
     .ital, em { font-style: italic; }
 
-    /* ticker */
-    .ticker {
-        position: fixed; top: 0; left: 0; right: 0; z-index: 110; background: var(--ink);
-        color: var(--paper); font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em;
-        padding: 7px 0; overflow: hidden; white-space: nowrap;
-    }
-    .ticker-track { display: inline-flex; gap: 26px; padding-left: 100%; animation: marquee 46s linear infinite; }
-    .ticker i { color: var(--ember); font-style: normal; }
-
     /* nav */
     nav {
-        position: fixed; top: 29px; left: 0; right: 0; z-index: 100; display: flex; align-items: center;
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center;
         gap: 22px; padding: 0 clamp(18px,4vw,36px); height: 60px;
         background: color-mix(in srgb, var(--paper) 86%, transparent);
         backdrop-filter: saturate(120%) blur(7px); -webkit-backdrop-filter: saturate(120%) blur(7px);
         border-bottom: 1px solid transparent; transition: border-color .3s, background .4s;
     }
     nav.scrolled { border-bottom: 1px solid var(--line); }
-    .nav-brand { font-family: var(--serif); font-size: 1.4rem; letter-spacing: -0.02em; margin-right: auto; display: flex; align-items: baseline; gap: 9px; }
-    .nav-brand::before { content: "◱"; color: var(--rust); font-size: 0.9em; }
+    .nav-brand { font-family: var(--serif); font-size: 1.4rem; letter-spacing: -0.02em; margin-right: auto; }
     .nav-links { list-style: none; display: flex; gap: 28px; align-items: center; }
     .nav-links a { font-family: var(--serif); font-size: 1.02rem; color: var(--ink-2); transition: color .2s; }
     .nav-links a em { font-family: var(--mono); font-style: normal; font-size: 0.6rem; color: var(--muted); vertical-align: super; margin-right: 3px; }
@@ -97,7 +87,8 @@
     .kicker::after { content: ""; flex: 0 0 40px; height: 1px; background: var(--line-2); }
 
     /* hero */
-    .hero { max-width: var(--maxw); margin: 0 auto; padding: clamp(140px,20vh,200px) clamp(18px,5vw,36px) clamp(40px,6vw,72px); }
+    .hero { max-width: var(--maxw); margin: 0 auto; padding: clamp(108px,15vh,150px) clamp(18px,5vw,36px) clamp(18px,3vw,32px); }
+    #news { padding-top: clamp(26px,4vw,44px); }
     .hero-content { display: grid; grid-template-columns: 300px 1fr; gap: clamp(32px,6vw,68px); align-items: start; }
     .hero-photo-col, .hero-text { min-width: 0; }
     .hero-photo-col { position: relative; }
@@ -211,21 +202,10 @@
         .fade-in { opacity: 1; transform: none; }
         html { scroll-behavior: auto; }
     }
-    @keyframes marquee { to { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
 
-<div class="ticker" aria-hidden="true">
-    <div class="ticker-track">
-        <span>EFFICIENCY</span><i>✦</i><span>DISTRIBUTED LEARNING</span><i>✦</i><span>PRIVACY</span><i>✦</i>
-        <span>SKETCHING</span><i>✦</i><span>LSH &amp; KV-CACHE COMPRESSION</span><i>✦</i><span>WATERMARKING</span><i>✦</i>
-        <span>NUMERICAL METHODS</span><i>✦</i>
-        <span>EFFICIENCY</span><i>✦</i><span>DISTRIBUTED LEARNING</span><i>✦</i><span>PRIVACY</span><i>✦</i>
-        <span>SKETCHING</span><i>✦</i><span>LSH &amp; KV-CACHE COMPRESSION</span><i>✦</i><span>WATERMARKING</span><i>✦</i>
-        <span>NUMERICAL METHODS</span><i>✦</i>
-    </div>
-</div>
 
 <!-- Navigation -->
 <nav>
@@ -256,12 +236,13 @@
             <div class="sketch-buttons">
                 <button class="sketch-btn active" onclick="showSketch('img/sketch_original.png', this)">original</button>
                 <button class="sketch-btn" onclick="showSketch('img/sketch_count.png', this)">count</button>
-                <button class="sketch-btn" onclick="showSketch('img/sketch_gaussian.png', this)">gaussian</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_halftone.png', this)">halftone</button>
+                <button class="sketch-btn" onclick="showSketch('img/sketch_pencil.png', this)">pencil</button>
             </div>
             <p class="sketch-caption">
-                &#47;&#47; my face, recovered pixel-wise from a <b>count</b> and a <b>Gaussian</b> sketch
-                &mdash; a random projection to <b>m&nbsp;=&nbsp;6000</b>. Sketching happens to be one of the
-                things I study.
+                &#47;&#47; my face, run through a few sketches &mdash; a randomized <b>count</b> sketch
+                (recovered pixel-wise), a <b>halftone</b> screen, and a <b>pencil</b> pass. Sketching
+                happens to be one of the things I study.
             </p>
         </div>
         <div class="hero-text">
