@@ -17,3 +17,18 @@
 ### Notes
 - Must push to master for GitHub Pages to render (no branch deploys)
 - Old CSS files (css/freelancer.css, css/bootstrap.min.css) still in repo but no longer referenced
+
+### Session: 2026-08-10 — polsia-style rebuild
+- **Full redesign (v2)** into an editorial "polsia" idiom, matching the Next Puzzle
+  site: light cool-paper palette + near-black ink + burnt-rust accent, sharp 2px
+  corners, hairline rules, registration/crop-mark corners on the portrait, and a
+  mono "instrument" treatment for the sketch toggle. Typography swapped to
+  **Instrument Serif** (display) + **Instrument Sans** (body) + **IBM Plex Mono**
+  (labels). Kept dark/light toggle (light is now default; dark via [data-theme]).
+- Dropped the wireframe canvas background. All content preserved (news, 12 works,
+  hidden workshop section, artwork + lightbox, socials, CV link).
+- **Fixed the sketches** — regenerated Count and Gaussian portraits *pixel-wise*
+  (whole image flattened per channel) instead of the old 1-D row sketching that
+  caused horizontal banding. See generate_sketches.py.
+- **Cleanup**: removed unreferenced Bootstrap/Freelancer/jQuery/Font-Awesome/less
+  and glyphicon font dirs; resolved a committed merge conflict in README.md.

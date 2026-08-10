@@ -63,3 +63,34 @@
 - **Sketch images** are precomputed PNGs (`img/sketch_*.png`). To regenerate with different parameters, edit and run `generate_sketches.py` (requires Pillow + numpy).
 - **When testing visual changes:** the `WebFetch` tool cannot visually render pages — it only reads HTML/CSS. For layout bugs, reason through the CSS math (element dimensions, transforms, overflow) rather than relying on fetch results.
 - **Precompute > client-side compute** when results are deterministic. Offloading sketch math to a Python script eliminated ~200 lines of JS and removed page load latency.
+
+### Session: 2026-08-10
+
+1. **v2 redesign (polsia editorial style)** — see plan.md. Single self-contained
+   `index.html`; Instrument Serif + Instrument Sans + IBM Plex Mono; rust accent.
+2. **Pixel-wise sketches** — `generate_sketches.py` now sketches the *entire*
+   flattened image per channel, not per row.
+   - **Count**: each pixel hashes to one of `m=22000` buckets with a +/-1 sign;
+     recover per pixel; **median-of-9** to kill collision outliers (`np.bincount`
+     for the sketch, near-instant).
+   - **Gaussian**: `y=Sx`, `x_hat=S^T y`, **mean-of-24**, `m=6000` per copy. Uses
+     bit-packed +/-1 (Achlioptas / Rademacher) entries via `np.unpackbits` — a
+     sub-Gaussian JL surrogate that looks identical to a true Gaussian projection
+     but samples ~40x faster (true `randn` is only ~40 M/s; bits are ~1.7 G/s).
+   - Deterministic (fixed seeds). Runs in ~12s.
+3. **Repo cleanup** — deleted dead framework dirs (css/js/less/font-awesome/fonts),
+   rewrote README (was a Start-Bootstrap boilerplate with a merge conflict).
+
+## Lessons Learned (2026-08-10)
+
+### Sketching an image "pixel-wise" vs "row-wise"
+- The old demo sketched each **row** (a 220-vector) independently → strong
+  horizontal banding. Treating the image as one flattened pixel vector per channel
+  spreads the reconstruction error as uniform grain instead of streaks.
+- A dense true-Gaussian `S` at good fidelity is infeasible here (m*N ~ 8.5e8
+  entries; `randn` at 40 M/s → ~15 min). Bit-packed **Rademacher** (`±1`) is the
+  standard fast JL substitute (Achlioptas) — visually identical, samples ~40x
+  faster. Recovery is unbiased since `E[S^T S] = m·I` (divide by `k·m`).
+- Headless Chrome clamps its **layout viewport to a 500px minimum**, so
+  `--window-size=390` screenshots show a 500px layout cropped into 390px (looks
+  like overflow but isn't). Measure `scrollWidth==clientWidth` to be sure.
