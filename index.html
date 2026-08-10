@@ -14,36 +14,36 @@
 
     <style>
     :root {
-        --bg:      #f7f5f0;
+        --bg:      #f5f6f8;
         --panel:   #ffffff;
-        --panel-2: #efece5;
-        --ink:     #1b1a17;
-        --ink-2:   #56534d;
-        --muted:   #8c887f;
-        --line:    rgba(27,26,23,0.10);
-        --line-2:  rgba(27,26,23,0.17);
-        --accent:  #c2410c;
-        --accent-soft: rgba(194,65,12,0.10);
+        --panel-2: #e7ebf0;
+        --ink:     #15181d;
+        --ink-2:   #4b515b;
+        --muted:   #828a95;
+        --line:    rgba(20,24,30,0.10);
+        --line-2:  rgba(20,24,30,0.16);
+        --accent:  #2a63c8;
+        --accent-soft: rgba(42,99,200,0.10);
         --font: 'Hanken Grotesk', system-ui, -apple-system, sans-serif;
         --r: 10px;
         --maxw: 1240px;
         --ease: cubic-bezier(.2,.6,.2,1);
     }
     [data-theme="dark"] {
-        --bg:      #1a1917;
-        --panel:   #232220;
-        --panel-2: #2a2825;
-        --ink:     #efece5;
-        --ink-2:   #c1beb5;
-        --muted:   #8c887e;
+        --bg:      #14161b;
+        --panel:   #1c1f26;
+        --panel-2: #232732;
+        --ink:     #e9ecf1;
+        --ink-2:   #b6bcc6;
+        --muted:   #828994;
         --line:    rgba(255,255,255,0.10);
         --line-2:  rgba(255,255,255,0.18);
-        --accent:  #ef8a5a;
-        --accent-soft: rgba(239,138,90,0.14);
+        --accent:  #7aa6f0;
+        --accent-soft: rgba(122,166,240,0.14);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 68px; }
     body {
         font-family: var(--font); background: var(--bg); color: var(--ink);
         line-height: 1.6; font-weight: 400; -webkit-font-smoothing: antialiased;
@@ -54,14 +54,30 @@
     h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.12; }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
 
+    /* ---------- top bar ---------- */
+    .topbar {
+        position: sticky; top: 0; z-index: 50;
+        background: color-mix(in srgb, var(--bg) 85%, transparent);
+        backdrop-filter: saturate(140%) blur(9px); -webkit-backdrop-filter: saturate(140%) blur(9px);
+        border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+        max-width: var(--maxw); margin: 0 auto; display: flex; align-items: center; gap: 22px;
+        padding: 11px clamp(20px, 4vw, 48px);
+    }
+    .tb-brand { font-weight: 700; font-size: 1rem; letter-spacing: -0.02em; margin-right: auto; }
+    .tb-nav { display: flex; gap: clamp(14px, 2vw, 26px); }
+    .tb-nav a { font-size: 0.9rem; font-weight: 500; color: var(--ink-2); transition: color .2s; }
+    .tb-nav a:hover { color: var(--accent); }
+
     /* ---------- shell ---------- */
     .shell {
         display: grid; grid-template-columns: 296px 1fr; gap: clamp(36px, 5vw, 76px);
-        max-width: var(--maxw); margin: 0 auto; padding: clamp(36px, 6vh, 60px) clamp(20px, 4vw, 48px) 0;
+        max-width: var(--maxw); margin: 0 auto; padding: clamp(24px, 4vh, 40px) clamp(20px, 4vw, 48px) 0;
     }
 
     /* ---------- left rail ---------- */
-    .rail { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 40px); overflow-y: auto; scrollbar-width: none; padding-bottom: 20px; }
+    .rail { position: sticky; top: 80px; align-self: start; max-height: calc(100vh - 96px); overflow-y: auto; scrollbar-width: none; padding-bottom: 20px; }
     .rail::-webkit-scrollbar { display: none; }
     .photo-card { width: 100%; }
     .photo { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 14px; overflow: hidden; background: var(--panel-2); box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 12px 30px -18px rgba(0,0,0,.35); }
@@ -83,12 +99,8 @@
     .bio a { color: var(--ink); font-weight: 500; border-bottom: 1px solid var(--line-2); transition: color .2s, border-color .2s; }
     .bio a:hover { color: var(--accent); border-color: var(--accent); }
 
-    .rail-nav { display: flex; flex-wrap: wrap; gap: 7px 16px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
-    .rail-nav a { font-size: 0.9rem; font-weight: 500; color: var(--ink-2); transition: color .2s; }
-    .rail-nav a:hover { color: var(--accent); }
-
-    .rail-foot { display: flex; align-items: center; gap: 14px; margin-top: 20px; }
-    .socials { display: flex; gap: 13px; margin-right: auto; }
+    .rail-foot { display: flex; align-items: center; gap: 14px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .socials { display: flex; gap: 15px; margin-right: auto; }
     .socials a { color: var(--muted); transition: color .2s, transform .2s; }
     .socials a:hover { color: var(--accent); transform: translateY(-2px); }
     .socials svg { width: 18px; height: 18px; fill: currentColor; display: block; }
@@ -153,7 +165,7 @@
     .rail-menu { display: none; }
 
     @media (max-width: 860px) {
-        .shell { grid-template-columns: 1fr; gap: 0; padding-top: 28px; }
+        .shell { grid-template-columns: 1fr; gap: 0; padding-top: 26px; }
         .rail { position: static; max-height: none; overflow: visible; padding-bottom: 30px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
         .photo-card { max-width: 260px; }
         .name { margin-top: 22px; }
@@ -162,6 +174,9 @@
     @media (max-width: 560px) {
         .artwork-grid { grid-template-columns: repeat(2, 1fr); }
         .news-year { grid-template-columns: 1fr; gap: 6px; }
+        .tb-brand { display: none; }
+        .tb-nav { gap: 16px; margin-right: auto; }
+        .tb-nav a { font-size: 0.86rem; }
     }
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -171,6 +186,19 @@
     </style>
 </head>
 <body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="tb-brand" href="#top">Tahseen Rabbani</a>
+        <nav class="tb-nav">
+            <a href="#news">News</a>
+            <a href="#papers">Works</a>
+            <a href="#artwork">Artwork</a>
+            <a href="docs/CV_Tahseen_Rabbani_Current.pdf">CV</a>
+        </nav>
+        <button class="theme-toggle" aria-label="Toggle light/dark mode" onclick="toggleTheme()"><span class="icon-sun">&#9788;</span><span class="icon-moon">&#9790;</span></button>
+    </div>
+</header>
 
 <div class="shell" id="top">
     <!-- LEFT RAIL -->
@@ -199,13 +227,6 @@
             <a href="https://furong-huang.com/">Furong Huang</a>.
         </p>
 
-        <nav class="rail-nav">
-            <a href="#news">News</a>
-            <a href="#papers">Works</a>
-            <a href="#artwork">Artwork</a>
-            <a href="docs/CV_Tahseen_Rabbani_Current.pdf">CV</a>
-        </nav>
-
         <div class="rail-foot">
             <div class="socials">
                 <a href="https://github.com/rabbanitw" aria-label="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
@@ -213,7 +234,6 @@
                 <a href="https://www.linkedin.com/in/tahseen-rabbani-27501170/" aria-label="LinkedIn"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
                 <a href="https://twitter.com/TahseenRab74917" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
             </div>
-            <button class="theme-toggle" aria-label="Toggle light/dark mode" onclick="toggleTheme()"><span class="icon-sun">&#9788;</span><span class="icon-moon">&#9790;</span></button>
         </div>
     </aside>
 
