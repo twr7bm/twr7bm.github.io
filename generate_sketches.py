@@ -24,7 +24,7 @@ SRC_HI = "img/selfie.jpg"
 DISP   = "img/sketch_original.jpg"
 CROP   = (1050, 0, 4650, 3600)   # square crop of selfie.jpg matching the framing
 DISP_PX = 720                    # crisp display original
-WORK    = 440                    # sketch working resolution (2x the old 220 baseline)
+WORK    = 720                    # sketches match the display resolution exactly
 S       = WORK // 220            # param scale factor vs the original baseline
 
 
@@ -130,7 +130,7 @@ def main():
         ("wavelet", make_wavelet(work)),
         ("lowrank", make_lowrank(work, r=12 * S)),
     ]:
-        Image.fromarray(arr).save(f"img/sketch_{name}.png")
+        Image.fromarray(arr).save(f"img/sketch_{name}.png", optimize=True)
         print(f"  {name:8s} -> img/sketch_{name}.png")
 
 
