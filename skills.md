@@ -119,3 +119,10 @@
   full-width hero photo. Verified SW==CW==360 (no horizontal overflow) via an
   in-page probe rendered inside a 360px iframe (headless clamps the *top-level*
   window to 500px min, so true phone widths must be tested via an iframe).
+
+### Session: 2026-08-10 (image quality + CV)
+- Updated CV (overwrote docs/CV_Tahseen_Rabbani_Current.pdf so the link stays put).
+- Hero was a 220px PNG upscaled on phones (soft). Now re-cropped from the 6000x4000
+  img/selfie.jpg: display original is a crisp 720px JPG (sketch_original.jpg), and the
+  four sketches render at 440px with 2x-scaled params. Capped the mobile photo at 300px
+  (it had been effectively full-width). generate_sketches.py does the crop + all four.

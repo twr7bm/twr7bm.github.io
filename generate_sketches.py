@@ -1,37 +1,41 @@
 #!/usr/bin/env python3
 """
-Generate the sketch portraits used on the hero photo toggle.
+Build the hero portrait + its four sketch toggles.
 
-Every option is a genuine *project-onto-a-subspace-then-recover* map — the same
-idea (compress by keeping few coefficients, then reconstruct) in four different
-bases, so the toggle reads as an honest little tour of linear sketching:
+Step 1 crops the high-res source photo (img/selfie.jpg, 6000x4000) to a square and
+saves a crisp display JPG (img/sketch_original.jpg). Step 2 makes four genuine
+*project-onto-a-subspace-then-recover* sketches from it — the same compress-then-
+reconstruct idea in four bases:
 
-  count    : randomized count-sketch. y = Sx via hashing (each pixel -> one of m
-             buckets with a +/-1 sign); recover x_hat = s * y[h]; median-of-k
-             kills the heavy-tailed collision noise. Reconstructed PIXEL-WISE
-             (whole image flattened per channel). -> colored speckle grain.
-  dct      : block DCT coding. Each 8x8 block is projected onto its top keep*keep
-             low-frequency cosine coefficients, then inverse-DCT'd. -> JPEG-style
-             blockiness.
-  wavelet  : Haar wavelet transform, keep the largest `keep_frac` coefficients by
-             magnitude (a sparse projection), then invert. -> multi-scale mosaic.
-  lowrank  : truncated SVD per channel — project onto the top-r singular subspace
-             and reconstruct. -> smooth "compressed" ghost.
+  count    : randomized count-sketch (hashing), recovered pixel-wise, median-of-k.
+  dct      : block-DCT, keep the low-frequency cosine coeffs per block, invert.
+  wavelet  : Haar transform, keep the largest coeffs by magnitude, invert.
+  lowrank  : truncated SVD per channel.
 
-Deterministic. Requires numpy + pillow.
+Sketches render at WORK px; the display photo at DISP px (higher, so it stays sharp
+on high-DPR phones). Params scale with resolution so the artifacts look consistent.
 
-    python3 generate_sketches.py
+Deterministic. Requires numpy + pillow.   ->   python3 generate_sketches.py
 """
 import numpy as np
 from PIL import Image
 
-SRC = "img/sketch_original.png"
+SRC_HI = "img/selfie.jpg"
+DISP   = "img/sketch_original.jpg"
+CROP   = (1050, 0, 4650, 3600)   # square crop of selfie.jpg matching the framing
+DISP_PX = 720                    # crisp display original
+WORK    = 440                    # sketch working resolution (2x the old 220 baseline)
+S       = WORK // 220            # param scale factor vs the original baseline
+
+
+def build_original():
+    im = Image.open(SRC_HI).convert("RGB").crop(CROP)
+    im.resize((DISP_PX, DISP_PX), Image.LANCZOS).save(DISP, quality=88)
+    return im.resize((WORK, WORK), Image.LANCZOS)
 
 
 # ---------------- count sketch (random hashing) ----------------
-C_M, C_K, C_SEED = 22000, 9, 7919
-
-def count_sketch(chan, m=C_M, k=C_K, seed=C_SEED):
+def _count_sketch(chan, m, k=9, seed=7919):
     N = chan.shape[0]
     rec = np.empty((k, N), np.float32)
     for t in range(k):
@@ -44,20 +48,21 @@ def count_sketch(chan, m=C_M, k=C_K, seed=C_SEED):
 
 def make_count(rgb):
     H, W, _ = rgb.shape
+    m = int(0.4545 * H * W)                     # keep the old m/N compression ratio
     out = np.empty_like(rgb)
     for c in range(3):
-        out[..., c] = count_sketch(rgb[..., c].reshape(-1)).reshape(H, W)
+        out[..., c] = _count_sketch(rgb[..., c].reshape(-1), m).reshape(H, W)
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
 # ---------------- block DCT coding ----------------
-def _dct_mat(n=8):
+def _dct_mat(n):
     k = np.arange(n)[:, None]; m = np.arange(n)[None, :]
     D = np.cos(np.pi * (2 * m + 1) * k / (2 * n)) * np.sqrt(2.0 / n)
     D[0] *= 1 / np.sqrt(2)
     return D
 
-def _dct_channel(ch, keep, n=8):
+def _dct_channel(ch, keep, n):
     D = _dct_mat(n)
     Hp = -(-ch.shape[0] // n) * n; Wp = -(-ch.shape[1] // n) * n
     p = np.zeros((Hp, Wp)); p[:ch.shape[0], :ch.shape[1]] = ch
@@ -66,17 +71,16 @@ def _dct_channel(ch, keep, n=8):
         for y in range(0, Hp, n):
             for x in range(0, Wp, n):
                 C = D @ p[y:y+n, x:x+n] @ D.T
-                M = np.zeros_like(C); M[:keep, :keep] = C[:keep, :keep]   # projection
+                M = np.zeros_like(C); M[:keep, :keep] = C[:keep, :keep]
                 out[y:y+n, x:x+n] = D.T @ M @ D
     return out[:ch.shape[0], :ch.shape[1]]
 
-def make_dct(rgb, keep=2):
-    return np.clip(np.stack([_dct_channel(rgb[..., c], keep) for c in range(3)], -1), 0, 255).astype(np.uint8)
+def make_dct(rgb, block, keep):
+    return np.clip(np.stack([_dct_channel(rgb[..., c], keep, block) for c in range(3)], -1), 0, 255).astype(np.uint8)
 
 
 # ---------------- Haar wavelet coding ----------------
 _R2 = np.sqrt(2.0)
-
 def _haar2d(a, L):
     cur = a.copy(); h, w = a.shape
     for l in range(L):
@@ -85,7 +89,6 @@ def _haar2d(a, L):
         e = (b[0::2, :] + b[1::2, :]) / _R2; o = (b[0::2, :] - b[1::2, :]) / _R2; b = np.concatenate([e, o], 0)
         cur[:ch, :cw] = b
     return cur
-
 def _ihaar2d(c, L):
     cur = c.copy(); h, w = c.shape
     for l in reversed(range(L)):
@@ -96,38 +99,36 @@ def _ihaar2d(c, L):
         row = np.empty_like(b); row[:, 0::2] = (le + ro) / _R2; row[:, 1::2] = (le - ro) / _R2
         cur[:ch, :cw] = row
     return cur
-
-def _wave_channel(ch, keep_frac, L=6, N=256):
+def _wave_channel(ch, keep_frac, N, L):
     p = np.zeros((N, N)); p[:ch.shape[0], :ch.shape[1]] = ch
     C = _haar2d(p, L); flat = np.abs(C).ravel()
     k = max(1, int(keep_frac * flat.size))
     thr = np.partition(flat, -k)[-k]
     C[np.abs(C) < thr] = 0
     return _ihaar2d(C, L)[:ch.shape[0], :ch.shape[1]]
-
 def make_wavelet(rgb, keep_frac=0.025):
-    return np.clip(np.stack([_wave_channel(rgb[..., c], keep_frac) for c in range(3)], -1), 0, 255).astype(np.uint8)
+    N = 1 << int(np.ceil(np.log2(max(rgb.shape[:2])))); L = 6
+    return np.clip(np.stack([_wave_channel(rgb[..., c], keep_frac, N, L) for c in range(3)], -1), 0, 255).astype(np.uint8)
 
 
 # ---------------- truncated SVD ----------------
-def make_lowrank(rgb, r=12):
+def make_lowrank(rgb, r):
     out = np.empty_like(rgb)
     with np.errstate(all="ignore"):
         for c in range(3):
-            U, S, Vt = np.linalg.svd(rgb[..., c].astype(np.float64), full_matrices=False)
-            out[..., c] = (U[:, :r] * S[:r]) @ Vt[:r]
+            U, Sg, Vt = np.linalg.svd(rgb[..., c].astype(np.float64), full_matrices=False)
+            out[..., c] = (U[:, :r] * Sg[:r]) @ Vt[:r]
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def main():
-    src = Image.open(SRC).convert("RGB")
-    rgb = np.asarray(src, np.float64)
-    print(f"source {SRC}  {src.size[0]}x{src.size[1]}")
+    work = np.asarray(build_original(), np.float64)
+    print(f"original -> {DISP} ({DISP_PX}px); sketches at {WORK}px (scale {S}x)")
     for name, arr in [
-        ("count",   make_count(rgb)),
-        ("dct",     make_dct(rgb)),
-        ("wavelet", make_wavelet(rgb)),
-        ("lowrank", make_lowrank(rgb)),
+        ("count",   make_count(work)),
+        ("dct",     make_dct(work, block=8 * S, keep=2 * S)),
+        ("wavelet", make_wavelet(work)),
+        ("lowrank", make_lowrank(work, r=12 * S)),
     ]:
         Image.fromarray(arr).save(f"img/sketch_{name}.png")
         print(f"  {name:8s} -> img/sketch_{name}.png")
