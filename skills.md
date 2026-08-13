@@ -126,3 +126,10 @@
   img/selfie.jpg: display original is a crisp 720px JPG (sketch_original.jpg), and the
   four sketches render at 440px with 2x-scaled params. Capped the mobile photo at 300px
   (it had been effectively full-width). generate_sketches.py does the crop + all four.
+
+### Session: 2026-08-10 (typography try)
+- Swapped the type system to a classic literary/FiveThirtyEight pairing (per a site
+  the user liked): body **Arapey** (serif), headings **Old Standard TT** (serif),
+  small UI/labels **Montserrat** (nav, venue pills, year labels, sketch buttons,
+  captions, footer). Kept the cool-blue palette + left-rail layout. Arapey has only
+  weight 400 (bold within body is synthetic, matching the source).
