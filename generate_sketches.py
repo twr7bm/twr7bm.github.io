@@ -111,6 +111,30 @@ def make_wavelet(rgb, keep_frac=0.025):
     return np.clip(np.stack([_wave_channel(rgb[..., c], keep_frac, N, L) for c in range(3)], -1), 0, 255).astype(np.uint8)
 
 
+# ---------------- Rademacher (dense sign) random projection ----------------
+def make_rademacher(rgb, R=256, keep=0.35, k=8, seed=4242, block=48):
+    """Dense +/-1 random projection y = S x, recover x_hat = S^T (S x) / (k*m),
+    averaged over k copies. E[S^T S] = m*I so the estimate is unbiased. A dense S
+    is O(m*N), so we compute at R px (Gaussian-like white-noise grain) then upsample.
+    """
+    small = np.asarray(Image.fromarray(np.clip(rgb, 0, 255).astype("uint8")).resize((R, R), Image.LANCZOS), np.float64)
+    N = R * R; m = int(keep * N)
+    out = np.empty_like(small)
+    for c in range(3):
+        x = small[..., c].reshape(-1).astype(np.float32)
+        acc = np.zeros(N, np.float64)
+        for t in range(k):
+            rng = np.random.default_rng(seed + t * 104729)
+            for b0 in range(0, m, block):                       # generate S in row-blocks
+                B = min(block, m - b0)
+                bits = np.unpackbits(rng.integers(0, 256, (B * N + 7) // 8, dtype=np.uint8))[:B * N]
+                Sb = bits.astype(np.float32).reshape(B, N) * 2 - 1
+                acc += (Sb.T @ (Sb @ x)).astype(np.float64)
+        out[..., c] = (acc / (k * m)).reshape(R, R)
+    up = Image.fromarray(np.clip(out, 0, 255).astype("uint8")).resize((rgb.shape[1], rgb.shape[0]), Image.LANCZOS)
+    return np.asarray(up)
+
+
 # ---------------- truncated SVD ----------------
 def make_lowrank(rgb, r):
     out = np.empty_like(rgb)
@@ -125,8 +149,9 @@ def main():
     work = np.asarray(build_original(), np.float64)
     print(f"original -> {DISP} ({DISP_PX}px); sketches at {WORK}px (scale {S}x)")
     for name, arr in [
-        ("count",   make_count(work)),
-        ("lowrank", make_lowrank(work, r=14)),
+        ("count",      make_count(work)),
+        ("rademacher", make_rademacher(work)),
+        ("lowrank",    make_lowrank(work, r=14)),
     ]:
         Image.fromarray(arr).save(f"img/sketch_{name}.png", optimize=True)
         print(f"  {name:8s} -> img/sketch_{name}.png")
