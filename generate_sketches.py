@@ -35,7 +35,7 @@ def build_original():
 
 
 # ---------------- count sketch (random hashing) ----------------
-def _count_sketch(chan, m, k=9, seed=7919):
+def _count_sketch(chan, m, k=5, seed=7919):
     N = chan.shape[0]
     rec = np.empty((k, N), np.float32)
     for t in range(k):
@@ -48,7 +48,7 @@ def _count_sketch(chan, m, k=9, seed=7919):
 
 def make_count(rgb):
     H, W, _ = rgb.shape
-    m = int(0.4545 * H * W)                     # keep the old m/N compression ratio
+    m = int(0.22 * H * W)                       # heavier compression -> more collision grain
     out = np.empty_like(rgb)
     for c in range(3):
         out[..., c] = _count_sketch(rgb[..., c].reshape(-1), m).reshape(H, W)
@@ -126,9 +126,9 @@ def main():
     print(f"original -> {DISP} ({DISP_PX}px); sketches at {WORK}px (scale {S}x)")
     for name, arr in [
         ("count",   make_count(work)),
-        ("dct",     make_dct(work, block=8 * S, keep=2 * S)),
-        ("wavelet", make_wavelet(work)),
-        ("lowrank", make_lowrank(work, r=12 * S)),
+        ("dct",     make_dct(work, block=32, keep=2)),
+        ("wavelet", make_wavelet(work, keep_frac=0.002)),
+        ("lowrank", make_lowrank(work, r=14)),
     ]:
         Image.fromarray(arr).save(f"img/sketch_{name}.png", optimize=True)
         print(f"  {name:8s} -> img/sketch_{name}.png")
