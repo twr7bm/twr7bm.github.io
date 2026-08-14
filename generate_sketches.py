@@ -126,8 +126,6 @@ def main():
     print(f"original -> {DISP} ({DISP_PX}px); sketches at {WORK}px (scale {S}x)")
     for name, arr in [
         ("count",   make_count(work)),
-        ("dct",     make_dct(work, block=32, keep=2)),
-        ("wavelet", make_wavelet(work, keep_frac=0.002)),
         ("lowrank", make_lowrank(work, r=14)),
     ]:
         Image.fromarray(arr).save(f"img/sketch_{name}.png", optimize=True)
