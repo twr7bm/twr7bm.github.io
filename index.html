@@ -183,8 +183,8 @@
         .artwork-grid { grid-template-columns: repeat(2, 1fr); }
         .news-year { grid-template-columns: 1fr; gap: 5px; }
         .tb-brand { display: none; }
-        .tb-nav { gap: 15px; margin-right: auto; }
-        .tb-nav a { font-size: 0.95rem; }
+        .tb-nav { gap: 12px; margin-right: auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+        .tb-nav a { font-size: 0.9rem; white-space: nowrap; }
         /* readable body type (16px+) per mobile guidance */
         .bio { font-size: 1rem; line-height: 1.6; }
         .news-year h3 { font-size: 0.82rem; }
@@ -213,6 +213,7 @@
             <a href="#news">News</a>
             <a href="#papers">Works</a>
             <a href="#artwork">Artwork</a>
+            <a href="gap1024.html">GAP1024</a>
             <a href="docs/CV_Tahseen_Rabbani_Current.pdf">CV</a>
         </nav>
         <button class="theme-toggle" aria-label="Toggle light/dark mode" onclick="toggleTheme()"><span class="icon-sun">&#9788;</span><span class="icon-moon">&#9790;</span></button>
