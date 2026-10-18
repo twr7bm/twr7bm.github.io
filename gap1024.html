@@ -114,7 +114,7 @@
     .panel-head p { font-family: var(--ui); font-size: 0.78rem; color: var(--muted); max-width: 78ch; line-height: 1.55; }
 
     /* ---------- the magnifying share bars ---------- */
-    .cascade { display: grid; }
+    .cascade { display: grid; gap: 26px; }
     .cas-row { display: grid; gap: 8px; }
     .cas-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 14px; align-items: baseline; font-family: var(--ui); font-size: 0.8rem; }
     .cas-head .t { color: var(--ink); font-weight: 600; }
@@ -133,9 +133,6 @@
     .k1 { background: var(--ink-2); color: var(--bg); }
     .seg.rest { background: repeating-linear-gradient(135deg, var(--panel-2) 0 5px, var(--panel) 5px 10px); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line-2); }
     .seg.rest:hover, .seg.rest.hl { box-shadow: inset 0 0 0 2px var(--ink); filter: none; }
-    .cas-link { display: block; width: 100%; height: 30px; overflow: visible; }
-    .cas-link polygon { fill: var(--panel-2); opacity: 0.75; }
-    .cas-link line { stroke: var(--line-2); stroke-width: 1; vector-effect: non-scaling-stroke; }
     .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 2px 18px; font-family: var(--ui); font-size: 0.76rem; color: var(--ink-2); }
     .legend li { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding-block: 3px; border-radius: 4px; }
     .legend li:hover, .legend li.hl { color: var(--ink); }
@@ -343,15 +340,7 @@
     .bitout .grp { font-family: var(--head); font-size: 1.5rem; line-height: 1.2; }
     .bitout p { font-size: 0.95rem; color: var(--ink-2); }
 
-    /* ---------- roadmap, references ---------- */
-    .roadmap { display: grid; border-top: 1px solid var(--line-2); max-width: 840px; }
-    .road { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
-    .road h3 { font-size: 1.12rem; margin-bottom: 4px; }
-    .road p { font-size: 0.98rem; color: var(--ink-2); max-width: 66ch; }
-    .status { display: inline-block; justify-self: start; align-self: start; margin-top: 3px; font-family: var(--ui); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
-    .status.live { color: var(--ok); background: color-mix(in srgb, var(--ok) 13%, transparent); }
-    .status.next { color: var(--accent); background: var(--accent-soft); }
-    .status.planned { color: var(--ink-2); background: var(--panel-2); }
+    /* ---------- references ---------- */
     .ref { font-size: 0.98rem; color: var(--ink-2); max-width: 76ch; display: grid; gap: 10px; }
     .foot { border-top: 1px solid var(--line); padding-top: 22px; font-family: var(--ui); font-size: 0.78rem; color: var(--muted); }
 
@@ -383,7 +372,6 @@
         .tb-nav { gap: 12px; margin-right: auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
         .tb-nav a { font-size: 0.9rem; white-space: nowrap; }
         .facts { grid-template-columns: 1fr; }
-        .road { grid-template-columns: 1fr; gap: 6px; }
         .prose { font-size: 1.03rem; }
         .cas-bar { height: 36px; }
         .bitbtn { width: 76px; }
@@ -418,7 +406,7 @@
             <h1>GAP1024<span class="pow">2<sup>10</sup></span></h1>
             <p class="lede">Every group of order 1024, written down one by one.</p>
             <p class="prose">There are 49,487,367,289 groups of order 1024. David Burrell counted them in 2022, but most of them had never been written down. GAP1024 assembles all of them into one library: each group appears exactly once, as an explicit presentation, and every family is checked against Burrell's count.</p>
-            <nav class="toc" aria-label="On this page"><a href="#census">The library</a><a href="#explorer">Group explorer</a><a href="#browse">Browse and filter</a><a href="#records">How a record works</a><a href="#database">Roadmap</a></nav>
+            <nav class="toc" aria-label="On this page"><a href="#census">The library</a><a href="#explorer">Group explorer</a><a href="#browse">Browse and filter</a><a href="#records">How a record works</a></nav>
         </div>
         <div class="figs">
             <div class="fig big"><b>49,487,367,289</b><span>groups of order 1024, all of them in the library</span></div>
@@ -463,7 +451,7 @@
     <section id="explorer">
         <div class="intro">
             <h2 class="section-title">Group explorer</h2>
-            <p class="prose">Paste a record, pick an example, or draw a random group. The page computes the invariants and presentations from the record alone, exactly and in your browser; nothing is sent anywhere. Records cover the groups of p-class 2. Reading the pc codes of the other groups is on the roadmap below.</p>
+            <p class="prose">Paste a record, pick an example, or draw a random group. The page computes the invariants and presentations from the record alone, exactly and in your browser; nothing is sent anywhere. Records cover the groups of p-class 2.</p>
         </div>
         <div class="panel explorer">
             <form class="ex-input" id="ex-form" autocomplete="off">
@@ -528,22 +516,6 @@
         </div>
     </section>
 
-    <section id="database">
-        <div class="intro">
-            <h2 class="section-title">Toward a database</h2>
-            <p class="prose">The goal is a page and a download for every group of order 1024, with more than a wiki entry holds: presentations, identification, subgroups, classes, characters and automorphisms. Here is the plan.</p>
-        </div>
-        <div class="roadmap">
-            <div class="road"><span class="status live">Live</span><div><h3>Structure from the record</h3><p>The invariants, presentations and GAP code in the explorer, computed in the browser for any record in a few milliseconds.</p></div></div>
-            <div class="road"><span class="status live">Live</span><div><h3>The small cells in full</h3><p>All 6,512 groups of cells (9, 1), (8, 2) and (4, 6), with |Aut(<i>G</i>)|, filters by invariant, and GAP code for any selection.</p></div></div>
-            <div class="road"><span class="status next">Next</span><div><h3>Downloads</h3><p>Every group of order 1024, all 49,487,367,289 of them, in files anyone can download: records for the groups of p-class 2 and GAP pc codes for the rest, with a manifest and a checksum for every file. They will include the lower central series of every group, with each term identified in GAP's SmallGroups library; the nilpotency classes in the grid above come from it.</p></div></div>
-            <div class="road"><span class="status next">Next</span><div><h3>Identifiers and lookup</h3><p>A stable number for every group, and a lookup that takes a presentation to its group. For p-class 2 this uses the census canonicaliser, compiled to run in the browser.</p></div></div>
-            <div class="road"><span class="status next">Next</span><div><h3>Automorphism groups</h3><p>|Aut(<i>G</i>)| for every group. For p-class 2 it equals 2<sup><i>KE</i></sup> times the order of the stabiliser in GL(<i>K</i>, 2) of the record's space of forms, which the canonicaliser computes.</p></div></div>
-            <div class="road"><span class="status next">Next</span><div><h3>Search by invariants</h3><p>Exact tables of all groups of order 1024 by centre, derived subgroup, conjugacy classes and character degrees, so that a question like “how many groups have exactly 160 conjugacy classes?” gets an exact answer.</p></div></div>
-            <div class="road"><span class="status planned">Planned</span><div><h3>The explorer for every group</h3><p>The same structure page for the groups of p-class 1 and at least 3, computed from their pc codes.</p></div></div>
-            <div class="road"><span class="status planned">Planned</span><div><h3>More from GAP</h3><p>The Schur multiplier and the structure of Aut(<i>G</i>), precomputed for the small families and for samples of the large ones.</p></div></div>
-        </div>
-    </section>
 
     <section id="references">
         <div class="intro"><h2 class="section-title">References</h2></div>
@@ -808,21 +780,14 @@ function renderCascade() {
         html += '<div class="cas-row"><div class="cas-head"><span><span class="t">' + (i ? 'The remaining ' + fmt(tot) : 'All ' + fmt(tot) + ' groups') + '</span>' +
             (i ? '<span class="z">magnified ×' + sig3(ALL / tot) + '</span>' : '') + '</span><span class="n">' + (i ? pct(tot) + ' of all groups' : 'order 1024') + '</span></div>' +
             '<div class="cas-bar">' + segs + '</div><ul class="legend">' + legend + '</ul></div>';
-        if (rest) html += '<svg class="cas-link" data-row="' + i + '" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><polygon points="90,0 100,0 100,30 0,30"></polygon><line x1="90" y1="0" x2="0" y2="30"></line><line x1="100" y1="0" x2="100" y2="30"></line></svg>';
     });
     $('#cascade').innerHTML = html;
     layoutCascade();
 }
-function layoutCascade() {          // labels only where they fit; each link starts under the rest of its bar
+function layoutCascade() {          // labels only where they fit
     $$('#cascade .seg').forEach(function (s) {
         s.classList.remove('narrow');
         var sp = s.firstChild; if (sp && sp.scrollWidth + 16 > s.clientWidth) s.classList.add('narrow');
-    });
-    $$('#cascade .cas-link').forEach(function (svg) {
-        var bar = svg.previousElementSibling.querySelector('.cas-bar'), rest = bar.querySelector('.rest');
-        var x0 = Math.max(0, Math.min(100, rest.offsetLeft / bar.clientWidth * 100));
-        svg.querySelector('polygon').setAttribute('points', x0.toFixed(2) + ',0 100,0 100,30 0,30');
-        var ln = svg.querySelector('line'); ln.setAttribute('x1', x0.toFixed(2));
     });
 }
 
