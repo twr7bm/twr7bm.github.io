@@ -342,6 +342,24 @@
 
     /* ---------- references ---------- */
     .ref { font-size: 0.98rem; color: var(--ink-2); max-width: 76ch; display: grid; gap: 10px; }
+    .ref { grid-template-columns: minmax(0, 1fr); }   /* lets the BibTeX box scroll inside itself on phones */
+    .ref h3 { font-family: var(--ui); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
+    .ref ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .ref li { display: grid; grid-template-columns: 2.6em minmax(0, 1fr); gap: 0 6px; scroll-margin-top: 80px; }
+    .ref li .rn { font-family: var(--ui); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 0.12em; }
+    .ref li:target { background: var(--panel-2); border-radius: 6px; }
+    .ref a { overflow-wrap: anywhere; }
+    .cite { font-family: var(--ui); font-size: 0.8em; white-space: nowrap; }
+    .ref .ann { display: block; color: var(--muted); font-size: 0.92em; margin-top: 2px; }
+    .cite-text { color: var(--ink); }
+    /* ---------- worked example ---------- */
+    .worked table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .worked th, .worked td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    .worked th { font-family: var(--ui); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    .worked table.bits td { font-size: 0.9rem; text-align: center; padding: 6px 5px; }
+    .worked table.bits tr:first-child td { font-family: var(--ui); font-size: 0.72rem; color: var(--muted); }
+    .worked table.forms td { color: var(--ink-2); }
+    .worked .display { text-align: center; font-size: 1.06rem; color: var(--ink); overflow-x: auto; white-space: nowrap; padding: 4px 0; }
     .foot { border-top: 1px solid var(--line); padding-top: 22px; font-family: var(--ui); font-size: 0.78rem; color: var(--muted); }
 
     @media (max-width: 900px) {
@@ -405,8 +423,8 @@
             <p class="eyebrow">Computational group theory</p>
             <h1>GAP1024<span class="pow">2<sup>10</sup></span></h1>
             <p class="lede">Every group of order 1024, written down one by one.</p>
-            <p class="prose">There are 49,487,367,289 groups of order 1024. David Burrell counted them in 2022, but most of them had never been written down. GAP1024 assembles all of them into one library: each group appears exactly once, as an explicit presentation, and every family is checked against Burrell's count.</p>
-            <nav class="toc" aria-label="On this page"><a href="#census">The library</a><a href="#explorer">Group explorer</a><a href="#browse">Browse and filter</a><a href="#records">How a record works</a></nav>
+            <p class="prose">There are 49,487,367,289 groups of order 1024. Besche, Eick and O'Brien counted them in 2001 <span class="cite">[<a href="#ref-15">15</a>]</span>, when they constructed every other group of order at most 2000 for GAP's SmallGroups library <span class="cite">[<a href="#ref-4">4</a>, <a href="#ref-16">16</a>]</span>; David Burrell corrected the count in 2022 <span class="cite">[<a href="#ref-1">1</a>]</span>. Most of these groups had never been written down. GAP1024 assembles all of them into one library: each group appears exactly once, as an explicit presentation, and every family is checked against Burrell's count <span class="cite">[<a href="#ref-1">1</a>]</span>.</p>
+            <nav class="toc" aria-label="On this page"><a href="#census">The library</a><a href="#explorer">Group explorer</a><a href="#browse">Browse and filter</a><a href="#records">How a record works</a><a href="#references">References</a></nav>
         </div>
         <div class="figs">
             <div class="fig big"><b>49,487,367,289</b><span>groups of order 1024, all of them in the library</span></div>
@@ -418,7 +436,7 @@
     <section id="census">
         <div class="intro">
             <h2 class="section-title">The library</h2>
-            <p class="prose">Two numbers sort the groups. The <em>rank</em> of a group <i>G</i> is its minimal number of generators, so that <span class="math">|<i>G</i> : Φ(<i>G</i>)| = 2<sup><i>d</i></sup></span>. The <em>p-class</em> is the length of the lower exponent-2 central series, which runs from <i>G</i> down to 1 with each term <span class="math">[<i>P</i>, <i>G</i>]<i>P</i><sup>2</sup></span> of the one before. The groups of p-class 2, those whose Frattini subgroup is central and elementary abelian, form cells <span class="math">(<i>K</i>, <i>E</i>)</span>: rank <i>K</i> and <span class="math">|Φ(<i>G</i>)| = 2<sup><i>E</i></sup></span>, with <span class="math"><i>K</i> + <i>E</i> = 10</span>. A third number, the <em>nilpotency class</em>, is the length of the lower central series <span class="math"><i>G</i> > [<i>G</i>, <i>G</i>] > [<i>G</i>, <i>G</i>, <i>G</i>] > … > 1</span>; it is at most the p-class.</p>
+            <p class="prose">Two numbers sort the groups. The <em>rank</em> of a group <i>G</i> is its minimal number of generators, so that <span class="math">|<i>G</i> : Φ(<i>G</i>)| = 2<sup><i>d</i></sup></span>. The <em>p-class</em> is the length of the lower exponent-2 central series, which runs from <i>G</i> down to 1 with each term <span class="math">[<i>P</i>, <i>G</i>]<i>P</i><sup>2</sup></span> of the one before <span class="cite">[<a href="#ref-7">7</a>, <a href="#ref-8">8</a>]</span>. The groups of p-class 2, those whose Frattini subgroup is central and elementary abelian, form cells <span class="math">(<i>K</i>, <i>E</i>)</span>: rank <i>K</i> and <span class="math">|Φ(<i>G</i>)| = 2<sup><i>E</i></sup></span>, with <span class="math"><i>K</i> + <i>E</i> = 10</span>. A third number, the <em>nilpotency class</em>, is the length of the lower central series <span class="math"><i>G</i> > [<i>G</i>, <i>G</i>] > [<i>G</i>, <i>G</i>, <i>G</i>] > … > 1</span>; it is at most the p-class.</p>
         </div>
 
         <div class="panel">
@@ -445,7 +463,7 @@
                 <div class="table-wrap"><table class="census" id="rp-table" aria-label="Groups of order 1024 by p-class and the columns of the grid"></table></div>
             </details>
         </div>
-        <p class="note" style="margin-top:14px">Every count is checked against Burrell's. For p-class 2, two independent Cauchy–Frobenius programs reproduce his numbers too: the groups in cell (<i>K</i>, <i>E</i>) correspond to the orbits of GL(<i>K</i>, 2) on <i>E</i>-dimensional spaces of quadratic forms on F<sub>2</sub><sup><i>K</i></sup>. The counts by rank and p-class outside p-class 2 come from Burrell's GRPS1024 and agree with the groups in the library.</p>
+        <p class="note" style="margin-top:14px">Every count is checked against Burrell's <span class="cite">[<a href="#ref-1">1</a>]</span>. For p-class 2, two independent programs that count orbits with the Cauchy–Frobenius lemma, the approach of Eick and O'Brien <span class="cite">[<a href="#ref-10">10</a>]</span>, reproduce his numbers too: the groups in cell (<i>K</i>, <i>E</i>) correspond to the orbits of GL(<i>K</i>, 2) on <i>E</i>-dimensional spaces of quadratic forms on F<sub>2</sub><sup><i>K</i></sup>. The counts by rank and p-class outside p-class 2 come from Burrell's GRPS1024 <span class="cite">[<a href="#ref-2">2</a>]</span> and agree with the groups in the library.</p>
     </section>
 
     <section id="explorer">
@@ -506,7 +524,7 @@
         <div class="anatomy">
             <div>
                 <p class="prose">A record <span class="rec">K E f<sub>1</sub> … f<sub>E</sub></span> lists the cell and <i>E</i> integers. Write the generators of <i>G</i> modulo Φ(<i>G</i>) as <span class="math"><i>g</i><sub>1</sub>, …, <i>g<sub>K</sub></i></span> and a basis of Φ(<i>G</i>) as <span class="math"><i>z</i><sub>1</sub>, …, <i>z<sub>E</sub></i></span>. Bit <i>i</i> of <span class="math"><i>f<sub>l</sub></i></span> says whether <span class="math"><i>z<sub>l</sub></i></span> occurs in the square <span class="math"><i>g</i><sub><i>i</i>+1</sub><sup>2</sup></span>. The higher bits do the same for the commutators <span class="math">[<i>g<sub>i</sub></i>, <i>g<sub>j</sub></i>]</span>, with the pairs taken in the order (1, 2), (1, 3), …, (<i>K</i> − 1, <i>K</i>).</p>
-                <p class="prose">In group terms, each <span class="math"><i>f<sub>l</sub></i></span> is a quadratic form on F<sub>2</sub><sup><i>K</i></sup>. Many records describe the same group, since a change of generators changes the forms, and the library stores exactly one record per group. In the cells of rank at most 7 it is the canonical record, so two groups there are isomorphic exactly when their canonical records agree; for the cells (8, 2) and (9, 1) it is a fixed representative. Groups of p-class 1 or at least 3 use GAP pc codes instead, the format of GAP's SmallGroups library, and load with <span class="rec">PcGroupCode(code, 1024)</span>.</p>
+                <p class="prose">In group terms, each <span class="math"><i>f<sub>l</sub></i></span> is a quadratic form on F<sub>2</sub><sup><i>K</i></sup>, and together they make the squaring map of <i>G</i>; the example below writes one out. Many records describe the same group, since a change of generators changes the forms, and the library stores exactly one record per group. In the cells of rank at most 7 it is the canonical record, so two groups there are isomorphic exactly when their canonical records agree; for the cells (8, 2) and (9, 1) it is a fixed representative. Groups of p-class 1 or at least 3 use GAP pc codes instead, the format of GAP's SmallGroups library <span class="cite">[<a href="#ref-4">4</a>, <a href="#ref-16">16</a>]</span>, and load with <span class="rec">PcGroupCode(code, 1024)</span>.</p>
             </div>
             <div class="panel bitdemo" id="bitdemo">
                 <div class="panel-head"><h3>Try it: the groups of order 8</h3><p>One generator z of Φ(G), two generators g1, g2. Switch the three bits of f.</p></div>
@@ -514,16 +532,86 @@
                 <div class="bitout" id="bitout" aria-live="polite"></div>
             </div>
         </div>
+        <div class="panel worked" id="worked">
+            <div class="panel-head"><h3>Worked example: a record as a quadratic map</h3><p>The example record of cell (6, 4), the cell that holds 96.4% of all groups, written out in full.</p></div>
+            <p class="prose">Take <span class="rec">6 4 262145 131099 74800 24884</span>, so <i>K</i> = 6 and <i>E</i> = 4. Each <span class="math"><i>f<sub>l</sub></i></span> has 21 bits, one for each monomial of degree 2 in <span class="math"><i>x</i><sub>1</sub>, …, <i>x</i><sub>6</sub></span>: bits 0 to 5 are the squares and bits 6 to 20 the products, with the pairs in the order (1, 2), (1, 3), …, (5, 6).</p>
+            <div class="table-wrap"><table class="bits" aria-label="Bit positions and monomials for K = 6"><tr><th>bit</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr><tr><th>monomial</th><td><i>x</i><sub>1</sub><sup>2</sup></td><td><i>x</i><sub>2</sub><sup>2</sup></td><td><i>x</i><sub>3</sub><sup>2</sup></td><td><i>x</i><sub>4</sub><sup>2</sup></td><td><i>x</i><sub>5</sub><sup>2</sup></td><td><i>x</i><sub>6</sub><sup>2</sup></td><td><i>x</i><sub>1</sub><i>x</i><sub>2</sub></td><td><i>x</i><sub>1</sub><i>x</i><sub>3</sub></td><td><i>x</i><sub>1</sub><i>x</i><sub>4</sub></td><td><i>x</i><sub>1</sub><i>x</i><sub>5</sub></td><td><i>x</i><sub>1</sub><i>x</i><sub>6</sub></td><td><i>x</i><sub>2</sub><i>x</i><sub>3</sub></td><td><i>x</i><sub>2</sub><i>x</i><sub>4</sub></td><td><i>x</i><sub>2</sub><i>x</i><sub>5</sub></td><td><i>x</i><sub>2</sub><i>x</i><sub>6</sub></td><td><i>x</i><sub>3</sub><i>x</i><sub>4</sub></td><td><i>x</i><sub>3</sub><i>x</i><sub>5</sub></td><td><i>x</i><sub>3</sub><i>x</i><sub>6</sub></td><td><i>x</i><sub>4</sub><i>x</i><sub>5</sub></td><td><i>x</i><sub>4</sub><i>x</i><sub>6</sub></td><td><i>x</i><sub>5</sub><i>x</i><sub>6</sub></td></tr></table></div>
+            <p class="prose">Writing each integer as a sum of powers of 2 and replacing each power by its monomial gives one quadratic form per <span class="math"><i>z<sub>l</sub></i></span>:</p>
+            <div class="table-wrap"><table class="forms" aria-label="The four integers of the record and their quadratic forms"><tr><th>integer</th><th>powers of 2</th><th>quadratic form</th></tr><tr><td><i>f</i><sub>1</sub> = 262145</td><td>2<sup>18</sup> + 2<sup>0</sup></td><td><i>q</i><sub>1</sub> = <i>x</i><sub>1</sub><sup>2</sup> + <i>x</i><sub>4</sub><i>x</i><sub>5</sub></td></tr><tr><td><i>f</i><sub>2</sub> = 131099</td><td>2<sup>17</sup> + 2<sup>4</sup> + 2<sup>3</sup> + 2<sup>1</sup> + 2<sup>0</sup></td><td><i>q</i><sub>2</sub> = <i>x</i><sub>1</sub><sup>2</sup> + <i>x</i><sub>2</sub><sup>2</sup> + <i>x</i><sub>4</sub><sup>2</sup> + <i>x</i><sub>5</sub><sup>2</sup> + <i>x</i><sub>3</sub><i>x</i><sub>6</sub></td></tr><tr><td><i>f</i><sub>3</sub> = 74800</td><td>2<sup>16</sup> + 2<sup>13</sup> + 2<sup>10</sup> + 2<sup>5</sup> + 2<sup>4</sup></td><td><i>q</i><sub>3</sub> = <i>x</i><sub>5</sub><sup>2</sup> + <i>x</i><sub>6</sub><sup>2</sup> + <i>x</i><sub>1</sub><i>x</i><sub>6</sub> + <i>x</i><sub>2</sub><i>x</i><sub>5</sub> + <i>x</i><sub>3</sub><i>x</i><sub>5</sub></td></tr><tr><td><i>f</i><sub>4</sub> = 24884</td><td>2<sup>14</sup> + 2<sup>13</sup> + 2<sup>8</sup> + 2<sup>5</sup> + 2<sup>4</sup> + 2<sup>2</sup></td><td><i>q</i><sub>4</sub> = <i>x</i><sub>3</sub><sup>2</sup> + <i>x</i><sub>5</sub><sup>2</sup> + <i>x</i><sub>6</sub><sup>2</sup> + <i>x</i><sub>1</sub><i>x</i><sub>4</sub> + <i>x</i><sub>2</sub><i>x</i><sub>5</sub> + <i>x</i><sub>2</sub><i>x</i><sub>6</sub></td></tr></table></div>
+            <p class="prose">Together they make a quadratic map <span class="math"><i>q</i> = (<i>q</i><sub>1</sub>, <i>q</i><sub>2</sub>, <i>q</i><sub>3</sub>, <i>q</i><sub>4</sub>) : F<sub>2</sub><sup>6</sup> → F<sub>2</sub><sup>4</sup></span>, and it is the squaring map of <i>G</i>. Since every commutator is central, <span class="math">(<i>ab</i>)<sup>2</sup> = <i>a</i><sup>2</sup><i>b</i><sup>2</sup>[<i>b</i>, <i>a</i>]</span>, and so for every <span class="math"><i>x</i> ∈ F<sub>2</sub><sup>6</sup></span></p>
+            <p class="display">(<i>g</i><sub>1</sub><sup><i>x</i><sub>1</sub></sup> <i>g</i><sub>2</sub><sup><i>x</i><sub>2</sub></sup> ⋯ <i>g</i><sub>6</sub><sup><i>x</i><sub>6</sub></sup>)<sup>2</sup> = <i>z</i><sub>1</sub><sup><i>q</i><sub>1</sub>(<i>x</i>)</sup> <i>z</i><sub>2</sub><sup><i>q</i><sub>2</sub>(<i>x</i>)</sup> <i>z</i><sub>3</sub><sup><i>q</i><sub>3</sub>(<i>x</i>)</sup> <i>z</i><sub>4</sub><sup><i>q</i><sub>4</sub>(<i>x</i>)</sup>.</p>
+            <p class="prose">The <span class="math"><i>x<sub>i</sub></i><sup>2</sup></span> terms give the squares of the generators and the <span class="math"><i>x<sub>i</sub>x<sub>j</sub></i></span> terms the commutators, because the commutator map is the polarization <span class="math"><i>q</i>(<i>x</i> + <i>y</i>) + <i>q</i>(<i>x</i>) + <i>q</i>(<i>y</i>)</span>. For example <span class="math"><i>x</i> = (0, 0, 0, 1, 1, 0)</span> gives <span class="math">(<i>g</i><sub>4</sub><i>g</i><sub>5</sub>)<sup>2</sup> = <i>z</i><sub>1</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub></span>, and indeed <span class="math"><i>g</i><sub>4</sub><sup>2</sup> <i>g</i><sub>5</sub><sup>2</sup> [<i>g</i><sub>5</sub>, <i>g</i><sub>4</sub>] = <i>z</i><sub>2</sub> · <i>z</i><sub>2</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub> · <i>z</i><sub>1</sub> = <i>z</i><sub>1</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub></span>. Read term by term, the record is this presentation, in which each <i>z</i> is central of order 2, so that <span class="math">[<i>g<sub>i</sub></i>, <i>g<sub>j</sub></i>] = [<i>g<sub>j</sub></i>, <i>g<sub>i</sub></i>]</span>:</p>
+            <div class="codebox"><pre id="workedpres">g1^2 = z1·z2        [g1, g4] = z4
+g2^2 = z2           [g1, g6] = z3
+g3^2 = z4           [g2, g5] = z3·z4
+g4^2 = z2           [g2, g6] = z4
+g5^2 = z2·z3·z4     [g3, g5] = z3
+g6^2 = z3·z4        [g3, g6] = z2
+                    [g4, g5] = z1
+
+all other commutators are trivial</pre><button class="btn ghost sm copy" type="button" data-copy="workedpres">Copy</button></div>
+            <div><button class="btn sm" type="button" id="worked-open" data-rec="6 4 262145 131099 74800 24884">Open it in the explorer</button></div>
+        </div>
     </section>
 
 
     <section id="references">
         <div class="intro"><h2 class="section-title">References</h2></div>
         <div class="ref">
-            <p>David Burrell, <i>On the number of groups of order 1024</i>, Communications in Algebra 50(6) (2022), 2408–2410. <a href="https://doi.org/10.1080/00927872.2021.2006680">doi:10.1080/00927872.2021.2006680</a></p>
-            <p>David Burrell, <i>GRPS1024</i>, a GAP package (Artistic License 2.0). The groups of p-class 1 and 3 to 10 in the library, and their counts by rank, come from its data.</p>
-            <p>The GAP Group, <i>GAP — Groups, Algorithms, and Programming</i>. <a href="https://www.gap-system.org">gap-system.org</a></p>
+            <h3>The data and the software</h3>
+            <ol>
+                <li id="ref-1"><span class="rn">[1]</span><span>David Burrell, <i>On the number of groups of order 1024</i>, Communications in Algebra 50(6) (2022), 2408–2410. <a href="https://doi.org/10.1080/00927872.2021.2006680">doi:10.1080/00927872.2021.2006680</a><span class="ann">The count 49,487,367,289 used throughout this page; it corrects the 49,487,365,422 of <span class="cite">[<a href="#ref-15">15</a>]</span>.</span></span></li>
+                <li id="ref-2"><span class="rn">[2]</span><span>David Burrell, <i>GRPS1024</i>, a GAP package (Artistic License 2.0). <span class="ann">The groups of p-class 1 and 3 to 10 in the library, and their counts by rank, come from its data.</span></span></li>
+                <li id="ref-3"><span class="rn">[3]</span><span>The GAP Group, <i>GAP — Groups, Algorithms, and Programming</i>, Version 4.12.2, 2022. <a href="https://www.gap-system.org">gap-system.org</a><span class="ann">The version used for every GAP computation behind this page.</span></span></li>
+                <li id="ref-4"><span class="rn">[4]</span><span>Hans Ulrich Besche, Bettina Eick and Eamonn A. O'Brien, <i>SmallGrp — The GAP Small Groups Library</i>, a GAP package, version 1.5.1, 2022. <a href="https://gap-packages.github.io/smallgrp/">gap-packages.github.io/smallgrp</a><span class="ann">The groups outside p-class 2 are stored as pc codes, the format of this library.</span></span></li>
+                <li id="ref-5"><span class="rn">[5]</span><span>Bettina Eick and Eamonn A. O'Brien, <i>AutPGrp — Computing the Automorphism Group of a p-Group</i>, a GAP package, version 1.11, 2022. <a href="https://gap-packages.github.io/autpgrp/">gap-packages.github.io/autpgrp</a><span class="ann">Used to compute or check the orders |Aut(<i>G</i>)| shown in the explorer.</span></span></li>
+                <li id="ref-6"><span class="rn">[6]</span><span>Greg Gamble, Werner Nickel and Eamonn A. O'Brien, <i>ANUPQ — ANU p-Quotient</i>, a GAP package, version 3.2.6, 2022. <a href="https://gap-packages.github.io/anupq/">gap-packages.github.io/anupq</a><span class="ann">Used to recompute, as descendants of 292 random parents, about a million of the groups taken from <span class="cite">[<a href="#ref-2">2</a>]</span>; they agreed.</span></span></li>
+            </ol>
+            <h3>Groups of small order</h3>
+            <ol>
+                <li id="ref-7"><span class="rn">[7]</span><span>Michael F. Newman, <i>Determination of groups of prime-power order</i>, in Group Theory (Canberra, 1975), Lecture Notes in Mathematics 573, Springer, 1977, 73–84. <a href="https://doi.org/10.1007/BFb0087814">doi:10.1007/BFb0087814</a></span></li>
+                <li id="ref-8"><span class="rn">[8]</span><span>Eamonn A. O'Brien, <i>The p-group generation algorithm</i>, Journal of Symbolic Computation 9 (1990), 677–698. <a href="https://doi.org/10.1016/S0747-7171(08)80082-X">doi:10.1016/S0747-7171(08)80082-X</a></span></li>
+                <li id="ref-9"><span class="rn">[9]</span><span>Eamonn A. O'Brien, <i>The groups of order 256</i>, Journal of Algebra 143 (1991), 219–235. <a href="https://doi.org/10.1016/0021-8693(91)90261-6">doi:10.1016/0021-8693(91)90261-6</a></span></li>
+                <li id="ref-10"><span class="rn">[10]</span><span>Bettina Eick and Eamonn A. O'Brien, <i>Enumerating p-groups</i>, Journal of the Australian Mathematical Society (Series A) 67 (1999), 191–205. <a href="https://doi.org/10.1017/S1446788700001166">doi:10.1017/S1446788700001166</a><span class="ann">Counting p-groups with the Cauchy–Frobenius lemma, the approach behind the p-class 2 checks on this page.</span></span></li>
+                <li id="ref-11"><span class="rn">[11]</span><span>Bettina Eick and Eamonn A. O'Brien, <i>The groups of order 512</i>, in Algorithmic Algebra and Number Theory (Heidelberg, 1997), Springer, 1999, 379–380. <a href="https://doi.org/10.1007/978-3-642-59932-3_18">doi:10.1007/978-3-642-59932-3_18</a></span></li>
+                <li id="ref-12"><span class="rn">[12]</span><span>Hans Ulrich Besche and Bettina Eick, <i>Construction of finite groups</i>, Journal of Symbolic Computation 27 (1999), 387–404. <a href="https://doi.org/10.1006/jsco.1998.0258">doi:10.1006/jsco.1998.0258</a></span></li>
+                <li id="ref-13"><span class="rn">[13]</span><span>Hans Ulrich Besche and Bettina Eick, <i>The groups of order at most 1000 except 512 and 768</i>, Journal of Symbolic Computation 27 (1999), 405–413. <a href="https://doi.org/10.1006/jsco.1998.0259">doi:10.1006/jsco.1998.0259</a></span></li>
+                <li id="ref-14"><span class="rn">[14]</span><span>Hans Ulrich Besche and Bettina Eick, <i>The groups of order q<sup>n</sup> · p</i>, Communications in Algebra 29 (2001), 1759–1772. <a href="https://doi.org/10.1081/AGB-100002131">doi:10.1081/AGB-100002131</a></span></li>
+                <li id="ref-15"><span class="rn">[15]</span><span>Hans Ulrich Besche, Bettina Eick and Eamonn A. O'Brien, <i>The groups of order at most 2000</i>, Electronic Research Announcements of the American Mathematical Society 7 (2001), 1–4. <a href="https://doi.org/10.1090/S1079-6762-01-00087-7">doi:10.1090/S1079-6762-01-00087-7</a><span class="ann">Constructs every group of order at most 2000 except those of order 1024, which it counts: 49,487,365,422.</span></span></li>
+                <li id="ref-16"><span class="rn">[16]</span><span>Hans Ulrich Besche, Bettina Eick and Eamonn A. O'Brien, <i>A millennium project: constructing small groups</i>, International Journal of Algebra and Computation 12 (2002), 623–644. <a href="https://doi.org/10.1142/S0218196702001115">doi:10.1142/S0218196702001115</a></span></li>
+                <li id="ref-17"><span class="rn">[17]</span><span>Michael F. Newman, Eamonn A. O'Brien and Michael R. Vaughan-Lee, <i>Groups and nilpotent Lie rings whose order is the sixth power of a prime</i>, Journal of Algebra 278 (2004), 383–401. <a href="https://doi.org/10.1016/j.jalgebra.2003.11.012">doi:10.1016/j.jalgebra.2003.11.012</a></span></li>
+                <li id="ref-18"><span class="rn">[18]</span><span>Eamonn A. O'Brien and Michael R. Vaughan-Lee, <i>The groups with order p<sup>7</sup> for odd prime p</i>, Journal of Algebra 292 (2005), 243–258. <a href="https://doi.org/10.1016/j.jalgebra.2005.01.019">doi:10.1016/j.jalgebra.2005.01.019</a></span></li>
+                <li id="ref-19"><span class="rn">[19]</span><span>Bettina Eick, Max Horn and Alexander Hulpke, <i>Constructing groups of “small” order: recent results and open problems</i>, in Algorithmic and Experimental Methods in Algebra, Geometry, and Number Theory, Springer, 2017, 199–211. <a href="https://doi.org/10.1007/978-3-319-70566-8_8">doi:10.1007/978-3-319-70566-8_8</a></span></li>
+            </ol>
+            <h3>Isomorphisms and automorphisms</h3>
+            <ol>
+                <li id="ref-20"><span class="rn">[20]</span><span>Eamonn A. O'Brien, <i>Isomorphism testing for p-groups</i>, Journal of Symbolic Computation 17 (1994), 133–147. <a href="https://doi.org/10.1006/jsco.1994.1007">doi:10.1006/jsco.1994.1007</a></span></li>
+                <li id="ref-21"><span class="rn">[21]</span><span>Bettina Eick, Charles R. Leedham-Green and Eamonn A. O'Brien, <i>Constructing automorphism groups of p-groups</i>, Communications in Algebra 30 (2002), 2271–2295. <a href="https://doi.org/10.1081/AGB-120003468">doi:10.1081/AGB-120003468</a><span class="ann">The algorithm of <span class="cite">[<a href="#ref-5">5</a>]</span>.</span></span></li>
+                <li id="ref-22"><span class="rn">[22]</span><span>Bettina Eick, <i>Automorphism groups of 2-groups</i>, Journal of Algebra 300 (2006), 91–101. <a href="https://doi.org/10.1016/j.jalgebra.2006.01.024">doi:10.1016/j.jalgebra.2006.01.024</a></span></li>
+            </ol>
+            <h3>Counting p-groups</h3>
+            <ol>
+                <li id="ref-23"><span class="rn">[23]</span><span>Graham Higman, <i>Enumerating p-groups. I: Inequalities</i>, Proceedings of the London Mathematical Society (3) 10 (1960), 24–30. <a href="https://doi.org/10.1112/plms/s3-10.1.24">doi:10.1112/plms/s3-10.1.24</a></span></li>
+                <li id="ref-24"><span class="rn">[24]</span><span>Graham Higman, <i>Enumerating p-groups. II: Problems whose solution is PORC</i>, Proceedings of the London Mathematical Society (3) 10 (1960), 566–582. <a href="https://doi.org/10.1112/plms/s3-10.1.566">doi:10.1112/plms/s3-10.1.566</a></span></li>
+                <li id="ref-25"><span class="rn">[25]</span><span>Charles C. Sims, <i>Enumerating p-groups</i>, Proceedings of the London Mathematical Society (3) 15 (1965), 151–166. <a href="https://doi.org/10.1112/plms/s3-15.1.151">doi:10.1112/plms/s3-15.1.151</a></span></li>
+                <li id="ref-26"><span class="rn">[26]</span><span>Simon R. Blackburn, Peter M. Neumann and Geetha Venkataraman, <i>Enumeration of Finite Groups</i>, Cambridge Tracts in Mathematics 173, Cambridge University Press, 2007. <a href="https://doi.org/10.1017/CBO9780511542756">doi:10.1017/CBO9780511542756</a></span></li>
+                <li id="ref-27"><span class="rn">[27]</span><span>Derek F. Holt, Bettina Eick and Eamonn A. O'Brien, <i>Handbook of Computational Group Theory</i>, Chapman &amp; Hall/CRC, 2005. <a href="https://doi.org/10.1201/9781420035216">doi:10.1201/9781420035216</a></span></li>
+            </ol>
             <p class="note">The code, the library and a paper on it will be released soon.</p>
+        </div>
+    </section>
+
+    <section id="cite">
+        <div class="intro"><h2 class="section-title">Citing this page</h2></div>
+        <div class="ref">
+            <p>If you use GAP1024, please cite this page, together with Burrell's count <span class="cite">[<a href="#ref-1">1</a>]</span> and GAP <span class="cite">[<a href="#ref-3">3</a>]</span>:</p>
+            <p class="cite-text">Tahseen Rabbani, <i>GAP1024: every group of order 1024</i>, 2026. https://twr7bm.github.io/gap1024.html</p>
+            <div class="codebox"><pre id="bibtex">@misc{rabbani2026gap1024,
+  author       = {Tahseen Rabbani},
+  title        = {{GAP1024}: every group of order 1024},
+  year         = {2026},
+  howpublished = {\url{https://twr7bm.github.io/gap1024.html}}
+}</pre><button class="btn ghost sm copy" type="button" data-copy="bibtex">Copy</button></div>
         </div>
     </section>
 
@@ -625,7 +713,7 @@ function rankText(r) {
 function pclassText(c) {
     if (c === 1) return 'p-class 1 means elementary abelian. The library stores this group as a GAP pc code.';
     if (c === 2) return 'p-class 2: the Frattini subgroup Φ(<i>G</i>) is central and elementary abelian. These groups are stored as records.';
-    return 'The lower exponent-2 central series of these groups has ' + c + ' steps. The library stores them as GAP pc codes, from Burrell\'s GRPS1024.';
+    return 'The lower exponent-2 central series of these groups has ' + c + ' steps. The library stores them as GAP pc codes, from Burrell\'s GRPS1024 [2].';
 }
 function cellText(K) {
     var E = 10 - K, t = 'Rank ' + K + ' and |Φ(<i>G</i>)| = 2<sup>' + E + '</sup>. The groups correspond to the orbits of GL(' + K + ', 2) on ' + E + '-dimensional spaces of quadratic forms on F<sub>2</sub><sup>' + K + '</sup>.';
@@ -650,7 +738,7 @@ function pclassesOf(r) { var o = []; PR.forEach(function (row, i) { if (row[r - 
 function blockCode(r, c) {
     var code = BLOCKEX[r + '_' + c];
     if (!code) return '';
-    return '<div class="codebox"><pre id="tipcode">G := PcGroupCode(' + code + ', 1024);;\n[ Size(G), RankPGroup(G), PClassPGroup(G) ];   # [ 1024, ' + r + ', ' + c + ' ]</pre><button class="btn ghost sm copy" type="button" data-copy="tipcode">Copy</button></div><p class="hint">GAP code for the first group of this block, in the order of GRPS1024.</p>';
+    return '<div class="codebox"><pre id="tipcode">G := PcGroupCode(' + code + ', 1024);;\n[ Size(G), RankPGroup(G), PClassPGroup(G) ];   # [ 1024, ' + r + ', ' + c + ' ]</pre><button class="btn ghost sm copy" type="button" data-copy="tipcode">Copy</button></div><p class="hint">GAP code for the first group of this block, in the order of GRPS1024 [2].</p>';
 }
 function cellActs(K) {
     var c = CELLS[K];
@@ -842,7 +930,7 @@ function pclassesOfNil(k) { var o = []; PN.forEach(function (row, i) { if (row[k
 function nilCode(c, k) {
     var code = NILEX[c + '_' + k];
     if (!code) return '';
-    return '<div class="codebox"><pre id="tipcode">G := PcGroupCode(' + code + ', 1024);;\n[ Size(G), PClassPGroup(G), NilpotencyClassOfGroup(G) ];   # [ 1024, ' + c + ', ' + k + ' ]</pre><button class="btn ghost sm copy" type="button" data-copy="tipcode">Copy</button></div><p class="hint">GAP code for the first such group in the order of GRPS1024.</p>';
+    return '<div class="codebox"><pre id="tipcode">G := PcGroupCode(' + code + ', 1024);;\n[ Size(G), PClassPGroup(G), NilpotencyClassOfGroup(G) ];   # [ 1024, ' + c + ', ' + k + ' ]</pre><button class="btn ghost sm copy" type="button" data-copy="tipcode">Copy</button></div><p class="hint">GAP code for the first such group in the order of GRPS1024 [2].</p>';
 }
 function rpNil(el, pin) {
     var c = +el.getAttribute('data-c'), k = +el.getAttribute('data-r'), n = PN[c - 1][k - 1], h = '<h4>p-class ' + c + ' · nilpotency class ' + k + '</h4>';
@@ -885,7 +973,7 @@ function rkRank(el) {
 };
 TIPS.rk = function (el) { return gridMode === 'nil' ? rkNil(el) : rkRank(el); };
 TIPS.all = function () {
-    return '<h4>all groups of order 1024</h4><div class="big">' + fmt(ALL) + '</div><p>The total of Burrell\'s count, and the number of groups in the library.</p>';
+    return '<h4>all groups of order 1024</h4><div class="big">' + fmt(ALL) + '</div><p>The total of Burrell\'s count [1], and the number of groups in the library.</p>';
 };
 var heatNav = [];
 function renderHeat() {
@@ -1397,6 +1485,13 @@ $$('#examples .chip').forEach(function (c) { c.addEventListener('click', functio
 $('#cellpick').innerHTML = [9, 8, 7, 6, 5, 4].map(function (K) { return '<option value="' + K + ' ' + (10 - K) + '"' + (K === 6 ? ' selected' : '') + '>cell (' + K + ', ' + (10 - K) + ')</option>'; }).join('');
 $('#randbtn').addEventListener('click', function () { var p = $('#cellpick').value.split(' ').map(Number); analyseAndRender(randomRecord(p[0], p[1]), { random: true }); });
 $('#ex-form').addEventListener('submit', function (ev) { ev.preventDefault(); analyseAndRender($('#rec').value); });
+$('#worked-open').addEventListener('click', function () { if (analyseAndRender(this.getAttribute('data-rec'))) $('#explorer').scrollIntoView(); });
+(function citeCheck() {            // every [n] in the text must point at reference n
+    var bad = [];
+    $$('.cite a').forEach(function (a) { var li = document.querySelector(a.getAttribute('href')), rn = li && li.querySelector('.rn'); if (!rn || rn.textContent !== '[' + a.textContent + ']') bad.push(a.getAttribute('href')); });
+    if ($('#worked-open').getAttribute('data-rec') !== CELLS[6].ex) bad.push('worked example is not the cell (6, 4) example');
+    if (bad.length) console.error('GAP1024 citations inconsistent: ' + bad.join(', '));
+})();
 window.addEventListener('hashchange', function () { var r = recFromHash(); if (r && (!current || current.record !== r)) analyseAndRender(r, { noHash: true }); });
 var start = recFromHash();
 if (!start || !analyseAndRender(start, { noHash: true })) analyseAndRender(EXAMPLES[0].rec, { noHash: true });
