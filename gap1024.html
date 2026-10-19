@@ -23,6 +23,9 @@
         --line:    rgba(20,24,30,0.10);
         --line-2:  rgba(20,24,30,0.17);
         --accent:  #2a63c8;
+        --red:     #b42318;
+        --red-bg:  #fef3f2;
+        --red-line: rgba(180,35,24,0.30);
         --accent-2: #a9c3ee;
         --accent-soft: rgba(42,99,200,0.10);
         --warm:    #b5651d;
@@ -342,6 +345,8 @@
 
     /* ---------- references ---------- */
     .ref { font-size: 0.98rem; color: var(--ink-2); max-width: 76ch; display: grid; gap: 10px; }
+    .notice { margin: 0 0 calc(20px - clamp(64px, 9vw, 104px)); padding: 14px 18px;   /* sits close above the hero, not a page gap away */ border: 1px solid var(--red-line); border-left: 4px solid var(--red); border-radius: 10px; background: var(--red-bg); color: var(--red); font-size: 0.98rem; line-height: 1.55; max-width: 92ch; }
+    .notice b { font-weight: 700; }
     .ref { grid-template-columns: minmax(0, 1fr); }   /* lets the BibTeX box scroll inside itself on phones */
     .ref h3 { font-family: var(--ui); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 10px; }
     .ref ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -417,6 +422,8 @@
 </header>
 
 <main class="page">
+
+    <div class="notice" role="note"><b>Getting the library.</b> The full library is about 148 GB of compressed files: 743 files holding all 49,487,367,289 groups. It currently lives on Dropbox and is looking for a more permanent home. For now, download requests can be made by e-mail to Tahseen Rabbani (University of Chicago), sent from an institutional address.</div>
 
     <section class="hero" id="top">
         <div class="hero-text">
@@ -605,12 +612,13 @@ all other commutators are trivial</pre><button class="btn ghost sm copy" type="b
         <div class="intro"><h2 class="section-title">Citing this page</h2></div>
         <div class="ref">
             <p>If you use GAP1024, please cite this page, together with Burrell's count <span class="cite">[<a href="#ref-1">1</a>]</span> and GAP <span class="cite">[<a href="#ref-3">3</a>]</span>:</p>
-            <p class="cite-text">Tahseen Rabbani, <i>GAP1024: every group of order 1024</i>, 2026. https://twr7bm.github.io/gap1024.html</p>
+            <p class="cite-text">Tahseen Rabbani, University of Chicago, <i>GAP1024: every group of order 1024</i>, 2026. https://twr7bm.github.io/gap1024.html</p>
             <div class="codebox"><pre id="bibtex">@misc{rabbani2026gap1024,
   author       = {Tahseen Rabbani},
   title        = {{GAP1024}: every group of order 1024},
   year         = {2026},
-  howpublished = {\url{https://twr7bm.github.io/gap1024.html}}
+  howpublished = {\url{https://twr7bm.github.io/gap1024.html}},
+  note         = {University of Chicago}
 }</pre><button class="btn ghost sm copy" type="button" data-copy="bibtex">Copy</button></div>
         </div>
     </section>
