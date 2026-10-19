@@ -384,12 +384,10 @@
     .worked .display { text-align: center; font-size: 1.06rem; color: var(--ink); overflow-x: auto; white-space: nowrap; padding: 4px 0; }
     .foot { border-top: 1px solid var(--line); padding-top: 22px; font-family: var(--ui); font-size: 0.78rem; color: var(--muted); }
     .foot .credit { display: block; margin-top: 6px; }
-    .panel.cfsg { margin: 0; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: clamp(18px, 4vw, 40px); align-items: center; }
+    .cfsg { margin: 0 auto; width: 100%; max-width: 480px; display: grid; gap: 10px; }   /* a centred image with a light caption */
     .cfsg img { width: 100%; height: auto; display: block; border-radius: 10px; }
-    .cfsg figcaption { display: grid; gap: 12px; font-family: inherit; font-size: inherit; line-height: inherit; color: var(--ink-2); }   /* a caption in prose, not the small chart-caption style */
-    .cfsg h3 { font-family: var(--head); font-size: 1.22rem; color: var(--ink); }
-    .cfsg .note a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-    @media (max-width: 720px) { .panel.cfsg { grid-template-columns: minmax(0, 1fr); } .cfsg img { max-width: 420px; justify-self: center; } }
+    .cfsg figcaption { text-align: center; }
+    .cfsg figcaption a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
     .foot a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 
     @media (max-width: 900px) {
@@ -465,13 +463,9 @@
         </div>
     </section>
 
-    <figure class="panel cfsg">
+    <figure class="cfsg">
         <img src="img/cfsg.jpg" width="900" height="900" loading="lazy" alt="Chart of the classification of the finite simple groups: the cyclic groups of prime order and the alternating groups on either side, the sixteen families of groups of Lie type in a ring, the Tits group in the middle, and the 26 sporadic groups in the corners.">
-        <figcaption>
-            <h3>Where the groups of order 1024 come from</h3>
-            <p class="prose">Every finite group is built from finite simple groups, shown here as the classification arranges them: the cyclic groups of prime order (Z<sub>n</sub>, left), the alternating groups (right), the sixteen families of groups of Lie type (the ring), the Tits group (middle) and the 26 sporadic groups (corners). A group of order 1024 uses only the smallest of them: its composition factors are ten copies of C<sub>2</sub>, and all 49,487,367,289 groups differ only in how those copies are glued together.</p>
-            <p class="note">Image: <a href="https://commons.wikimedia.org/wiki/File:Classification_of_the_finite_simple_groups.jpg">“Classification of the finite simple groups”</a> by <a href="https://commons.wikimedia.org/wiki/User:Mathsies">Mathsies</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; resized.</p>
-        </figcaption>
+        <figcaption>The classification of the finite simple groups: the cyclic groups of prime order (Z<sub>n</sub>) and the alternating groups at the sides, the sixteen families of groups of Lie type in the ring, the Tits group in the middle and the 26 sporadic groups in the corners. Image: <a href="https://commons.wikimedia.org/wiki/File:Classification_of_the_finite_simple_groups.jpg">“Classification of the finite simple groups”</a> by <a href="https://commons.wikimedia.org/wiki/User:Mathsies">Mathsies</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; resized.</figcaption>
     </figure>
 
     <section id="census">
