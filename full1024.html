@@ -359,7 +359,11 @@
     .ref .ann { color: var(--muted); font-size: 0.92em; margin-left: 0.3em; }
     .cite-text { color: var(--ink); }
     /* ---------- worked example ---------- */
-    .worked table { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .worked table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }   /* fill the panel; narrow screens scroll */
+    .worked .prose { max-width: none; }
+    .worked-end { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(16px, 3vw, 32px); align-items: start; }   /* the presentation beside its paragraph */
+    .worked-text { display: grid; gap: 16px; align-content: start; }
+    @media (max-width: 900px) { .worked-end { grid-template-columns: minmax(0, 1fr); } }
     .worked th, .worked td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
     .worked th { font-family: var(--ui); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
     .worked table.bits td { font-size: 0.9rem; text-align: center; padding: 6px 5px; }
@@ -548,8 +552,10 @@
             <div class="table-wrap"><table class="forms" aria-label="The four integers of the record and their quadratic forms"><tr><th>integer</th><th>powers of 2</th><th>quadratic form</th></tr><tr><td><i>f</i><sub>1</sub> = 262145</td><td>2<sup>18</sup> + 2<sup>0</sup></td><td><i>q</i><sub>1</sub> = <i>x</i><sub>1</sub><sup>2</sup> + <i>x</i><sub>4</sub><i>x</i><sub>5</sub></td></tr><tr><td><i>f</i><sub>2</sub> = 131099</td><td>2<sup>17</sup> + 2<sup>4</sup> + 2<sup>3</sup> + 2<sup>1</sup> + 2<sup>0</sup></td><td><i>q</i><sub>2</sub> = <i>x</i><sub>1</sub><sup>2</sup> + <i>x</i><sub>2</sub><sup>2</sup> + <i>x</i><sub>4</sub><sup>2</sup> + <i>x</i><sub>5</sub><sup>2</sup> + <i>x</i><sub>3</sub><i>x</i><sub>6</sub></td></tr><tr><td><i>f</i><sub>3</sub> = 74800</td><td>2<sup>16</sup> + 2<sup>13</sup> + 2<sup>10</sup> + 2<sup>5</sup> + 2<sup>4</sup></td><td><i>q</i><sub>3</sub> = <i>x</i><sub>5</sub><sup>2</sup> + <i>x</i><sub>6</sub><sup>2</sup> + <i>x</i><sub>1</sub><i>x</i><sub>6</sub> + <i>x</i><sub>2</sub><i>x</i><sub>5</sub> + <i>x</i><sub>3</sub><i>x</i><sub>5</sub></td></tr><tr><td><i>f</i><sub>4</sub> = 24884</td><td>2<sup>14</sup> + 2<sup>13</sup> + 2<sup>8</sup> + 2<sup>5</sup> + 2<sup>4</sup> + 2<sup>2</sup></td><td><i>q</i><sub>4</sub> = <i>x</i><sub>3</sub><sup>2</sup> + <i>x</i><sub>5</sub><sup>2</sup> + <i>x</i><sub>6</sub><sup>2</sup> + <i>x</i><sub>1</sub><i>x</i><sub>4</sub> + <i>x</i><sub>2</sub><i>x</i><sub>5</sub> + <i>x</i><sub>2</sub><i>x</i><sub>6</sub></td></tr></table></div>
             <p class="prose">Together they make a quadratic map <span class="math"><i>q</i> = (<i>q</i><sub>1</sub>, <i>q</i><sub>2</sub>, <i>q</i><sub>3</sub>, <i>q</i><sub>4</sub>) : F<sub>2</sub><sup>6</sup> → F<sub>2</sub><sup>4</sup></span>, and it is the squaring map of <i>G</i>. Since every commutator is central, <span class="math">(<i>ab</i>)<sup>2</sup> = <i>a</i><sup>2</sup><i>b</i><sup>2</sup>[<i>b</i>, <i>a</i>]</span>, and so for every <span class="math"><i>x</i> ∈ F<sub>2</sub><sup>6</sup></span></p>
             <p class="display">(<i>g</i><sub>1</sub><sup><i>x</i><sub>1</sub></sup> <i>g</i><sub>2</sub><sup><i>x</i><sub>2</sub></sup> ⋯ <i>g</i><sub>6</sub><sup><i>x</i><sub>6</sub></sup>)<sup>2</sup> = <i>z</i><sub>1</sub><sup><i>q</i><sub>1</sub>(<i>x</i>)</sup> <i>z</i><sub>2</sub><sup><i>q</i><sub>2</sub>(<i>x</i>)</sup> <i>z</i><sub>3</sub><sup><i>q</i><sub>3</sub>(<i>x</i>)</sup> <i>z</i><sub>4</sub><sup><i>q</i><sub>4</sub>(<i>x</i>)</sup>.</p>
-            <p class="prose">The <span class="math"><i>x<sub>i</sub></i><sup>2</sup></span> terms give the squares of the generators and the <span class="math"><i>x<sub>i</sub>x<sub>j</sub></i></span> terms the commutators, because the commutator map is the polarization <span class="math"><i>q</i>(<i>x</i> + <i>y</i>) + <i>q</i>(<i>x</i>) + <i>q</i>(<i>y</i>)</span>. For example <span class="math"><i>x</i> = (0, 0, 0, 1, 1, 0)</span> gives <span class="math">(<i>g</i><sub>4</sub><i>g</i><sub>5</sub>)<sup>2</sup> = <i>z</i><sub>1</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub></span>, and indeed <span class="math"><i>g</i><sub>4</sub><sup>2</sup> <i>g</i><sub>5</sub><sup>2</sup> [<i>g</i><sub>5</sub>, <i>g</i><sub>4</sub>] = <i>z</i><sub>2</sub> · <i>z</i><sub>2</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub> · <i>z</i><sub>1</sub> = <i>z</i><sub>1</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub></span>. Read term by term, the record is this presentation, in which each <i>z</i> is central of order 2, so that <span class="math">[<i>g<sub>i</sub></i>, <i>g<sub>j</sub></i>] = [<i>g<sub>j</sub></i>, <i>g<sub>i</sub></i>]</span>:</p>
-            <div class="codebox"><pre id="workedpres">g1^2 = z1·z2        [g1, g4] = z4
+            <div class="worked-end">
+                <div class="worked-text"><p class="prose">The <span class="math"><i>x<sub>i</sub></i><sup>2</sup></span> terms give the squares of the generators and the <span class="math"><i>x<sub>i</sub>x<sub>j</sub></i></span> terms the commutators, because the commutator map is the polarization <span class="math"><i>q</i>(<i>x</i> + <i>y</i>) + <i>q</i>(<i>x</i>) + <i>q</i>(<i>y</i>)</span>. For example <span class="math"><i>x</i> = (0, 0, 0, 1, 1, 0)</span> gives <span class="math">(<i>g</i><sub>4</sub><i>g</i><sub>5</sub>)<sup>2</sup> = <i>z</i><sub>1</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub></span>, and indeed <span class="math"><i>g</i><sub>4</sub><sup>2</sup> <i>g</i><sub>5</sub><sup>2</sup> [<i>g</i><sub>5</sub>, <i>g</i><sub>4</sub>] = <i>z</i><sub>2</sub> · <i>z</i><sub>2</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub> · <i>z</i><sub>1</sub> = <i>z</i><sub>1</sub><i>z</i><sub>3</sub><i>z</i><sub>4</sub></span>. Read term by term, the record is this presentation, in which each <i>z</i> is central of order 2, so that <span class="math">[<i>g<sub>i</sub></i>, <i>g<sub>j</sub></i>] = [<i>g<sub>j</sub></i>, <i>g<sub>i</sub></i>]</span>:</p>
+                    <div><button class="btn sm" type="button" id="worked-open" data-rec="6 4 262145 131099 74800 24884">Open it in the explorer</button></div></div>
+                <div class="codebox"><pre id="workedpres">g1^2 = z1·z2        [g1, g4] = z4
 g2^2 = z2           [g1, g6] = z3
 g3^2 = z4           [g2, g5] = z3·z4
 g4^2 = z2           [g2, g6] = z4
@@ -558,7 +564,7 @@ g6^2 = z3·z4        [g3, g6] = z2
                     [g4, g5] = z1
 
 all other commutators are trivial</pre><button class="btn ghost sm copy" type="button" data-copy="workedpres">Copy</button></div>
-            <div><button class="btn sm" type="button" id="worked-open" data-rec="6 4 262145 131099 74800 24884">Open it in the explorer</button></div>
+            </div>
         </div>
     </section>
 
